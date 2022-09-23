@@ -1,0 +1,4 @@
+#the main analisys package
+SOAPify @git+ssh://git@github.com/GMPavanLab/SOAPify.git@cf32a3311a1c25b223751c0338e1281a33a70fa3
+#some images are made with ovito
+#ovito
