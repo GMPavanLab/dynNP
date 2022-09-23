@@ -11,7 +11,7 @@ def worker(trajFileName: str) -> None:
             trajContainers=workFile["Trajectories"],
             SOAPoutContainers=soapFile.require_group("SOAP"),
             SOAPOutputChunkDim=1000,
-            SOAPnJobs=12,
+            SOAPnJobs=32,
             SOAPrcut=4.48023312,
             SOAPnmax=8,
             SOAPlmax=8,

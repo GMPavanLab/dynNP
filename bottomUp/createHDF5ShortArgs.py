@@ -20,11 +20,11 @@ def worker(completefilename: str, ff: str, ts: str, frames="100ps"):
     u = mdaUniverse(topo, completefilename, atom_style="id type x y z")
     u.atoms.types = ["Au"] * len(u.atoms)
     
-    MDA2HDF5(u, name + ".hdf5", trajname, trajChunkSize=1000, attrs=args)
+    MDA2HDF5(u, name + ".hdf5", trajname, trajChunkSize=1000, attrs=args,trajslice=slice(10000,None,10))
     # ref=u.select_atoms("index 0:1")
     ref = mdaUniverse(topo, atom_style="id type x y z")
     u.trajectory.add_transformations(transformations.fit_rot_trans(u, ref))
-    MDA2HDF5(u, name + "_fitted.hdf5", f"{trajname}_fitted", trajChunkSize=1000)
+    MDA2HDF5(u, name + "_fitted.hdf5", f"{trajname}_fitted", trajChunkSize=1000,trajslice=slice(10000,None,10))
 
 
 getT = re.compile("T_([0-9]*)")
