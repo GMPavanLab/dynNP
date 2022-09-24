@@ -1,2 +1,4 @@
 NPenv/
 *.hdf5
+*.pyc
+*.out

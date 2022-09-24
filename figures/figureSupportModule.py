@@ -1,5 +1,6 @@
 #%%
 # from matplotlib.gridspec import
+import imp
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb
 from mpl_toolkits.axisartist.axislines import AxesZero
@@ -11,6 +12,8 @@ from SOAPify import (
     SOAPclassification,
 )
 import seaborn
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib.image import imread
 
 getT = re.compile("T_([0-9]*)")
 
@@ -31,17 +34,32 @@ bottomUpcolorMap = numpy.array(
     ]
 )
 bottomUpLabels = [
-    "Faces",
-    "Concave",
-    "5foldedSS",
-    "Ico",
-    "Bulk",
-    "SubSurf",
-    "Edges",
-    "Vertexes",
+    "Faces",  # 0
+    "Concave",  # 1
+    "5foldedSS",  # 2
+    "Ico",  # 3
+    "Bulk",  # 4
+    "SubSurf",  # 5
+    "Edges",  # 6
+    "Vertexes",  # 7
 ]
 bottomReordering = [7, 6, 0, 1, 2, 5, 4, 3]
 bottomReordering_r = bottomReordering[::-1]
+
+topDownColorMap = numpy.array(
+    [
+        to_rgb("#708090"),  # b
+        to_rgb("#a6cee3"),  # ss
+        to_rgb("#1f78b4"),  # ss'
+        to_rgb("#33a02c"),  # c
+        to_rgb("#b2df8a"),  # c'
+        to_rgb("#e31a1c"),  # s
+        to_rgb("#fdbf6f"),  # e
+        to_rgb("#ff7f00"),  # e'
+        to_rgb("#6a3d9a"),  # v
+        to_rgb("#cab2d6"),  # v'
+    ]
+)
 
 
 def getF(proposed: float, concurrentArray, F):
@@ -84,7 +102,6 @@ def dataLoaderBottomUp(filename):
 
 #%%
 
-data = dataLoaderBottomUp("../bottomUp/ico309soap.hdf5")
 
 #%%
 def loadClassification(
@@ -97,7 +114,6 @@ def loadClassification(
             dataContainer[T]["labelsNN"] = classes[k]["labelsNN"][:].reshape(-1)
 
 
-loadClassification(data)
 #%%
 def addPseudoFes(tempData, bins=300, rangeHisto=None):
     hist, xedges, yedges = numpy.histogram2d(
@@ -113,11 +129,6 @@ def addPseudoFes(tempData, bins=300, rangeHisto=None):
     tempData["pFESLimitsY"] = (yedges[:-1] + yedges[1:]) / 2
 
 
-addPseudoFes(data[300], 150, rangeHisto=[data["xlims"], data["ylims"]])
-addPseudoFes(data[400], 150, rangeHisto=[data["xlims"], data["ylims"]])
-addPseudoFes(data[500], 150, rangeHisto=[data["xlims"], data["ylims"]])
-
-
 def createSimulationFigs(grid, fig, name=""):
     toret = dict()
     pcaFESGrid = grid[1:3].subgridspec(1, 3, width_ratios=[1, 1, 0.1])
@@ -130,6 +141,40 @@ def createSimulationFigs(grid, fig, name=""):
 
 
 #%%
+
+
+def decorateTmatWithLegend(
+    legendName,
+    legendReordering,
+    ax,
+    zoom=0.025,
+    offset=0.5,
+    horizontal=True,
+    vertical=True,
+):
+    n = len(legendReordering)
+    for i, l in enumerate(legendReordering):
+        img = OffsetImage(imread(f"{legendName}{l:04}.png"), zoom=zoom)
+        if vertical:
+            ab = AnnotationBbox(
+                img,
+                (0, i + 0.5),
+                xybox=(-offset, i + 0.5),
+                frameon=False,
+                xycoords="data",
+                #  box_alignment=(0.5, 0.5),
+            )
+            ax.add_artist(ab)
+        if horizontal:
+            ab = AnnotationBbox(
+                img,
+                (i + 0.5, 0),
+                xybox=(i + 0.5, n + offset),
+                frameon=False,
+                xycoords="data",
+                # box_alignment=(0.5, 0.5),
+            )
+            ax.add_artist(ab)
 
 
 def getCompactedAnnotationsForTmat_percent(tmat) -> list:
@@ -156,12 +201,8 @@ def addTmat(tempData):
     )[bottomReordering_r][:, bottomReordering_r]
 
 
-addTmat(data[300])
-addTmat(data[400])
-addTmat(data[500])
-
 #%%
-def plotTemperatureData(axesdict, T, data, xlims, ylims):
+def plotTemperatureData(axesdict, T, data, xlims, ylims, zoom=0.01):
     # option for the countour lines
     countourOptions = dict(
         levels=10,
@@ -222,6 +263,14 @@ def plotTemperatureData(axesdict, T, data, xlims, ylims):
         vmax=1,
         vmin=0,
         cbar=False,
+        xticklabels=False,
+        yticklabels=False,
+        annot_kws=dict(
+            weight="bold",
+        ),
+    )
+    decorateTmatWithLegend(
+        "bottomUp", bottomReordering_r, axesdict[f"tmat{T}Ax"], zoom=zoom
     )
     for ax in [axesdict[f"pca{T}Ax"], axesdict[f"pFES{T}Ax"]]:
         ax.set_xlim(xlims)
@@ -237,62 +286,21 @@ def plotTemperatureData(axesdict, T, data, xlims, ylims):
             ax.axis[direction].set_visible(False)
 
 
-##%%
-# for fig 1
-fig1 = plt.figure(figsize=(10, 5), dpi=300)
-fig2 = plt.figure(figsize=(10, 5), dpi=300)
-
-
-grid1 = fig1.add_gridspec(2, 4)
-grid2 = fig2.add_gridspec(2, 4)
-
-axesFig1 = dict(
-    soapAx=fig1.add_subplot(grid1[0, 0]),
-    idealAx=fig1.add_subplot(grid1[0, 1]),
-    idealSlicedAx=fig1.add_subplot(grid1[0, 2]),
-    legendAx=fig1.add_subplot(grid1[0, 3]),
-)
-axesFig2 = dict()
-axesFig1.update(createSimulationFigs(grid1[1, :].subgridspec(1, 4), fig1, name="300"))
-axesFig2.update(createSimulationFigs(grid2[0, :].subgridspec(1, 4), fig2, name="400"))
-axesFig2.update(createSimulationFigs(grid2[1, :].subgridspec(1, 4), fig2, name="500"))
-
-plotTemperatureData(axesFig1, 300, data[300], data["xlims"], data["ylims"])
-for T in [400, 500]:
-    plotTemperatureData(axesFig2, T, data[T], data["xlims"], data["ylims"])
-
 #%%
-bottomUpcolorMap = numpy.array(
-    [
-        to_rgb("#00b127"),  # plain
-        to_rgb("#e00081"),  # concave
-        to_rgb("#0086ba"),  # 5foldedSS
-        to_rgb("#003ac6"),  # ico
-        to_rgb("#450055"),  # bulk
-        to_rgb("#3800a8"),  # SS
-        to_rgb("#bdff0e"),  # edge
-        to_rgb("#ffe823"),  # vertex
-    ]
-)
-fig, ax = plt.subplots(2, 4)
-ax = ax.flatten()
+def colorBarExporter(listOfColors, filename=None):
+    from matplotlib.colors import ListedColormap
+    from matplotlib.cm import ScalarMappable
 
-for i in range(8):
-    address = data[T]["labelsNN"] == i
-    ax[i].scatter(
-        data[T]["pca"][address, 0],
-        data[T]["pca"][address, 1],
-        s=0.1,
-        color=bottomUpcolorMap[i],
+    fig, ax = plt.subplots(figsize=(1, 6))
+    ax.axis("off")
+    fig.colorbar(
+        ScalarMappable(cmap=ListedColormap(listOfColors)),
+        cax=ax,
+        orientation="vertical",
     )
-    notaddress = data[T]["labelsNN"] != i
-    ax[i].scatter(
-        data[T]["pca"][notaddress, 0],
-        data[T]["pca"][notaddress, 1],
-        s=0.1,
-        c="gray",
-    )
-    ax[i].set_title(i)
-    ax[i].axis("off")
-    ax[i].set_xlim(data["xlims"])
-    ax[i].set_ylim(data["ylims"])
+    if filename:
+        fig.savefig(fname=filename, bbox_inches="tight", pad_inches=0)
+
+
+# colorBarExporter(topDownColorMap[::-1], "topDownCMAP.png")
+# colorBarExporter(bottomUpcolorMap[::-1], "bottomUpCMAP.png")
