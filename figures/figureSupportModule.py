@@ -1,11 +1,16 @@
 #%%
 # from matplotlib.gridspec import
-from turtle import color
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgb
 from mpl_toolkits.axisartist.axislines import AxesZero
 import h5py
 import re, numpy
-
+import colorsys
+from SOAPify import (
+    transitionMatrixFromSOAPClassificationNormalized as tmatMaker,
+    SOAPclassification,
+)
+import seaborn
 
 getT = re.compile("T_([0-9]*)")
 
@@ -13,6 +18,30 @@ getT = re.compile("T_([0-9]*)")
 #%%
 # ../bottomUp/ico309soap.hdf5
 #
+bottomUpcolorMap = numpy.array(
+    [
+        to_rgb("#00b127"),  # Faces
+        to_rgb("#e00081"),  # Concave
+        to_rgb("#0086ba"),  # 5foldedSS
+        to_rgb("#003ac6"),  # Ico
+        to_rgb("#450055"),  # Bulk
+        to_rgb("#3800a8"),  # SubSurf
+        to_rgb("#bdff0e"),  # Edges
+        to_rgb("#ffe823"),  # Vertexes
+    ]
+)
+bottomUpLabels = [
+    "Faces",
+    "Concave",
+    "5foldedSS",
+    "Ico",
+    "Bulk",
+    "SubSurf",
+    "Edges",
+    "Vertexes",
+]
+bottomReordering = [7, 6, 0, 1, 2, 5, 4, 3]
+bottomReordering_r = bottomReordering[::-1]
 
 
 def getF(proposed: float, concurrentArray, F):
@@ -52,6 +81,8 @@ def dataLoaderBottomUp(filename):
 
     return dataContainer
 
+
+#%%
 
 data = dataLoaderBottomUp("../bottomUp/ico309soap.hdf5")
 
@@ -99,54 +130,102 @@ def createSimulationFigs(grid, fig, name=""):
 
 
 #%%
-# for fig 1
-fig = plt.figure(figsize=(10, 10))
 
-grid = fig.add_gridspec(4, 4)
 
-axes = dict(
-    soapAx=fig.add_subplot(grid[0, 0]),
-    idealAx=fig.add_subplot(grid[0, 1]),
-    idealSlicedAx=fig.add_subplot(grid[0, 2]),
-    legendAx=fig.add_subplot(grid[0, 3]),
-)
+def getCompactedAnnotationsForTmat_percent(tmat) -> list:
+    """
+    Returns a list of compacted annotations for a given tmat.
+    """
+    annot = list(numpy.empty(tmat.shape, dtype=str))
+    # annot=numpy.chararray(tmat.shape, itemsize=5)
+    for row in range(tmat.shape[0]):
+        annot[row] = list(annot[row])
+        for col in range(tmat.shape[1]):
+            if tmat[row, col] < 0.01:
+                annot[row][col] = f"<1"
+            elif tmat[row, col] > 0.99:
+                annot[row][col] = f">99"
+            else:
+                annot[row][col] = f"{100*tmat[row,col]:.0f}"
+    return annot
 
-axes.update(createSimulationFigs(grid[1, :].subgridspec(1, 4), fig, name="300"))
-axes.update(createSimulationFigs(grid[2, :].subgridspec(1, 4), fig, name="400"))
-axes.update(createSimulationFigs(grid[3, :].subgridspec(1, 4), fig, name="500"))
 
-for T in [300, 400, 500]:
+def addTmat(tempData):
+    tempData["tmat"] = tmatMaker(
+        SOAPclassification([], tempData["labelsNN"].reshape(-1, 309), bottomUpLabels)
+    )[bottomReordering_r][:, bottomReordering_r]
 
-    axes[f"pca{T}Ax"].scatter(
-        data[T]["pca"][:, 0], data[T]["pca"][:, 1], s=0.1, c=data[T]["labelsNN"], vmax=7
-    )
-    print(T, set(data[T]["labelsNN"]))
-    pfesPlot = axes[f"pFES{T}Ax"].contourf(
-        data[T]["pFESLimitsX"],
-        data[T]["pFESLimitsY"],
-        data[T]["pFES"],
+
+addTmat(data[300])
+addTmat(data[400])
+addTmat(data[500])
+
+#%%
+def plotTemperatureData(axesdict, T, data, xlims, ylims):
+    # option for the countour lines
+    countourOptions = dict(
         levels=10,
-        color="k",
-        linewidths=1,
+        colors="k",
+        linewidths=0.1,
         zorder=2,
     )
-    axes[f"pFES{T}Ax"].contour(
-        data[T]["pFESLimitsX"],
-        data[T]["pFESLimitsY"],
-        data[T]["pFES"],
+    # the pca points
+    axesdict[f"pca{T}Ax"].scatter(
+        data["pca"][:, 0],
+        data["pca"][:, 1],
+        s=0.1,
+        c=bottomUpcolorMap[data["labelsNN"]],
+        alpha=0.5,
+    )
+    axesdict[f"pca{T}Ax"].contour(
+        data["pFESLimitsX"],
+        data["pFESLimitsY"],
+        data["pFES"],
+        **countourOptions,
+    )
+
+    # pseudoFES representation
+    pfesPlot = axesdict[f"pFES{T}Ax"].contourf(
+        data["pFESLimitsX"],
+        data["pFESLimitsY"],
+        data["pFES"],
         levels=10,
+        cmap="coolwarm_r",
         zorder=1,
     )
+
+    axesdict[f"pFES{T}Ax"].contour(
+        data["pFESLimitsX"],
+        data["pFESLimitsY"],
+        data["pFES"],
+        **countourOptions,
+    )
+
     cbar = plt.colorbar(
         pfesPlot,
         shrink=0.5,
         aspect=10,
         orientation="vertical",
-        cax=axes[f"cbarFes{T}Ax"],
+        cax=axesdict[f"cbarFes{T}Ax"],
     )
-    for ax in [axes[f"pca{T}Ax"], axes[f"pFES{T}Ax"]]:
-        ax.set_xlim(data["xlims"])
-        ax.set_ylim(data["ylims"])
+    mask = data["tmat"] == 0
+    annots = getCompactedAnnotationsForTmat_percent(data["tmat"])
+    seaborn.heatmap(
+        data["tmat"],
+        linewidths=0.1,
+        ax=axesdict[f"tmat{T}Ax"],
+        fmt="s",
+        annot=annots,
+        mask=mask,
+        square=True,
+        cmap="rocket_r",
+        vmax=1,
+        vmin=0,
+        cbar=False,
+    )
+    for ax in [axesdict[f"pca{T}Ax"], axesdict[f"pFES{T}Ax"]]:
+        ax.set_xlim(xlims)
+        ax.set_ylim(ylims)
         ax.set_xticks([])
         ax.set_yticks([])
         for direction in ["left", "bottom"]:
@@ -154,4 +233,64 @@ for T in [300, 400, 500]:
 
         for direction in ["right", "top"]:
             ax.axis[direction].set_visible(False)
+
+
+##%%
+# for fig 1
+fig1 = plt.figure(figsize=(10, 5), dpi=300)
+fig2 = plt.figure(figsize=(10, 5), dpi=300)
+
+
+grid1 = fig1.add_gridspec(2, 4)
+grid2 = fig2.add_gridspec(2, 4)
+
+axesFig1 = dict(
+    soapAx=fig1.add_subplot(grid1[0, 0]),
+    idealAx=fig1.add_subplot(grid1[0, 1]),
+    idealSlicedAx=fig1.add_subplot(grid1[0, 2]),
+    legendAx=fig1.add_subplot(grid1[0, 3]),
+)
+axesFig2 = dict()
+axesFig1.update(createSimulationFigs(grid1[1, :].subgridspec(1, 4), fig1, name="300"))
+axesFig2.update(createSimulationFigs(grid2[0, :].subgridspec(1, 4), fig2, name="400"))
+axesFig2.update(createSimulationFigs(grid2[1, :].subgridspec(1, 4), fig2, name="500"))
+
+plotTemperatureData(axesFig1, 300, data[300], data["xlims"], data["ylims"])
+for T in [400, 500]:
+    plotTemperatureData(axesFig2, T, data[T], data["xlims"], data["ylims"])
+
 #%%
+bottomUpcolorMap = numpy.array(
+    [
+        to_rgb("#00b127"),  # plain
+        to_rgb("#e00081"),  # concave
+        to_rgb("#0086ba"),  # 5foldedSS
+        to_rgb("#003ac6"),  # ico
+        to_rgb("#450055"),  # bulk
+        to_rgb("#3800a8"),  # SS
+        to_rgb("#bdff0e"),  # edge
+        to_rgb("#ffe823"),  # vertex
+    ]
+)
+fig, ax = plt.subplots(2, 4)
+ax = ax.flatten()
+
+for i in range(8):
+    address = data[T]["labelsNN"] == i
+    ax[i].scatter(
+        data[T]["pca"][address, 0],
+        data[T]["pca"][address, 1],
+        s=0.1,
+        color=bottomUpcolorMap[i],
+    )
+    notaddress = data[T]["labelsNN"] != i
+    ax[i].scatter(
+        data[T]["pca"][notaddress, 0],
+        data[T]["pca"][notaddress, 1],
+        s=0.1,
+        c="gray",
+    )
+    ax[i].set_title(i)
+    ax[i].axis("off")
+    ax[i].set_xlim(data["xlims"])
+    ax[i].set_ylim(data["ylims"])
