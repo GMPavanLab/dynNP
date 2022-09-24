@@ -65,57 +65,78 @@ def addPseudoFes(tempData, bins=300, rangeHisto=None):
         density=True,
     )
     tempData["pFES"] = -numpy.log(hist.T)
+    tempData["pFES"] -= numpy.min(tempData["pFES"])
     tempData["pFESLimitsX"] = (xedges[:-1] + xedges[1:]) / 2
     tempData["pFESLimitsY"] = (yedges[:-1] + yedges[1:]) / 2
 
 
 addPseudoFes(data[300], 150, rangeHisto=[data["xlims"], data["ylims"]])
+addPseudoFes(data[400], 150, rangeHisto=[data["xlims"], data["ylims"]])
+addPseudoFes(data[500], 150, rangeHisto=[data["xlims"], data["ylims"]])
 
 
-##%%
+def createSimulationFigs(grid, fig, name=""):
+    toret = dict()
+    pcaFESGrid = grid[1:3].subgridspec(1, 3, width_ratios=[1, 1, 0.1])
+    toret[f"img{name}Ax"] = fig.add_subplot(grid[0])
+    toret[f"pca{name}Ax"] = fig.add_subplot(pcaFESGrid[0], axes_class=AxesZero)
+    toret[f"pFES{name}Ax"] = fig.add_subplot(pcaFESGrid[1], axes_class=AxesZero)
+    toret[f"cbarFes{name}Ax"] = fig.add_subplot(pcaFESGrid[2])
+    toret[f"tmat{name}Ax"] = fig.add_subplot(grid[3])
+    return toret
+
+
+#%%
 # for fig 1
-fig = plt.figure(figsize=(10, 5))
+fig = plt.figure(figsize=(10, 10))
 
-grid = fig.add_gridspec(2, 4)
+grid = fig.add_gridspec(4, 4)
 
-pcaFESGrid = grid[1, 1:3].subgridspec(1, 3, width_ratios=[1, 1, 0.1])
 axes = dict(
     soapAx=fig.add_subplot(grid[0, 0]),
     idealAx=fig.add_subplot(grid[0, 1]),
     idealSlicedAx=fig.add_subplot(grid[0, 2]),
     legendAx=fig.add_subplot(grid[0, 3]),
-    imgAx=fig.add_subplot(grid[1, 0]),
-    pcaAx=fig.add_subplot(pcaFESGrid[0], axes_class=AxesZero),
-    pFESAx=fig.add_subplot(pcaFESGrid[1], axes_class=AxesZero),
-    cbarFesAx=fig.add_subplot(pcaFESGrid[2]),
-    tmatAx=fig.add_subplot(grid[1, 3]),
 )
 
-axes["pcaAx"].scatter(data[300]["pca"][:, 0], data[300]["pca"][:, 1], s=0.1)
-pfesPlot = axes["pFESAx"].contourf(
-    data[300]["pFESLimitsX"],
-    data[300]["pFESLimitsY"],
-    data[300]["pFES"],
-    levels=10,
-    color="k",
-)
-axes["pFESAx"].contour(
-    data[300]["pFESLimitsX"],
-    data[300]["pFESLimitsY"],
-    data[300]["pFES"],
-    levels=10,
-)
-cbar = plt.colorbar(
-    pfesPlot, shrink=0.5, aspect=10, orientation="vertical", cax=axes["cbarFesAx"]
-)
-for ax in [axes["pcaAx"], axes["pFESAx"]]:
-    ax.set_xlim(data["xlims"])
-    ax.set_ylim(data["ylims"])
-    ax.set_xticks([])
-    ax.set_yticks([])
-    for direction in ["left", "bottom"]:
-        ax.axis[direction].set_axisline_style("-|>")
+axes.update(createSimulationFigs(grid[1, :].subgridspec(1, 4), fig, name="300"))
+axes.update(createSimulationFigs(grid[2, :].subgridspec(1, 4), fig, name="400"))
+axes.update(createSimulationFigs(grid[3, :].subgridspec(1, 4), fig, name="500"))
 
-    for direction in ["right", "top"]:
-        ax.axis[direction].set_visible(False)
+for T in [300, 400, 500]:
+
+    axes[f"pca{T}Ax"].scatter(data[T]["pca"][:, 0], data[T]["pca"][:, 1], s=0.1)
+    pfesPlot = axes[f"pFES{T}Ax"].contourf(
+        data[T]["pFESLimitsX"],
+        data[T]["pFESLimitsY"],
+        data[T]["pFES"],
+        levels=10,
+        color="k",
+        linewidths=1,
+        zorder=2,
+    )
+    axes[f"pFES{T}Ax"].contour(
+        data[T]["pFESLimitsX"],
+        data[T]["pFESLimitsY"],
+        data[T]["pFES"],
+        levels=10,
+        zorder=1,
+    )
+    cbar = plt.colorbar(
+        pfesPlot,
+        shrink=0.5,
+        aspect=10,
+        orientation="vertical",
+        cax=axes[f"cbarFes{T}Ax"],
+    )
+    for ax in [axes[f"pca{T}Ax"], axes[f"pFES{T}Ax"]]:
+        ax.set_xlim(data["xlims"])
+        ax.set_ylim(data["ylims"])
+        ax.set_xticks([])
+        ax.set_yticks([])
+        for direction in ["left", "bottom"]:
+            ax.axis[direction].set_axisline_style("-|>")
+
+        for direction in ["right", "top"]:
+            ax.axis[direction].set_visible(False)
 #%%

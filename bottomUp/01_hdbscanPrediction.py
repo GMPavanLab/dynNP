@@ -1,5 +1,6 @@
 from scipy.spatial.distance import cdist
 import hdbscan, numpy, h5py
+from time import perf_counter
 
 
 class hdbscanNoiseClassifier:
@@ -47,11 +48,11 @@ class hdbscanNoiseClassifier:
         dists = cdist([point], self.exemplars[clusterID]["points"])
         return dists.min()
 
-    def dist_vector(self, point):
-        result = {}
+    def dist_vector(self, points):
+        result = numpy.zeros((len(self.exemplars), points.shape[0]), dtype=numpy.double)
         for cluster in self.exemplars:
-            result[cluster] = cdist([point], self.exemplars[cluster]["points"]).min()
-        return numpy.array(list(result.values()))
+            result[cluster] = cdist(points, self.exemplars[cluster]["points"]).min()
+        return result
 
     def dist_membership_vector(self, point, softmax=False):
         if softmax:
@@ -67,15 +68,17 @@ class hdbscanNoiseClassifier:
         labels, strenghts = hdbscan.approximate_predict(self.__clusterer, data)
         membership_vector = hdbscan.membership_vector(self.__clusterer, data)
         labelsNoNoise = labels.copy()
-        for j, (p, l) in enumerate(zip(data, labelsNoNoise)):
-            if l == -1:
-                labelsNoNoise[j] = numpy.argmax(self.dist_membership_vector(p))
+        isNoise = labelsNoNoise == -1
+
+        labelsNoNoise[isNoise] = numpy.argmax(
+            self.dist_membership_vector(data[isNoise])
+        )
         return (labels, strenghts), membership_vector, labelsNoNoise
 
 
 #%%
-# _, _, lbl = hdnc.predict(pca)
 
+t1_start = perf_counter()
 
 with h5py.File("ico309soap.hdf5", "r") as fitfile:
     fitset = fitfile[
@@ -85,8 +88,11 @@ with h5py.File("ico309soap.hdf5", "r") as fitfile:
         fitset, min_cluster_size=125, cluster_selection_method="eom"
     )
 
-
-for fname in ["dh348_3_2_3", "ico309", "to309_9_4"]:
+t1_stop = perf_counter()
+print(f"Time for training: {t1_stop - t1_start} s")
+for fname in ["ico309", "dh348_3_2_3", "to309_9_4"]:
+    print(f"Working on {fname}")
+    t1_start = perf_counter()
     with h5py.File(f"{fname}soap.hdf5", "r") as datafile, h5py.File(
         f"{fname}classifications.hdf5", "w"  # this will overwrite!
     ) as classFile:
@@ -103,7 +109,10 @@ for fname in ["dh348_3_2_3", "ico309", "to309_9_4"]:
                 "labels", shape=labelshape, dtype=int, data=lbl.reshape(labelshape)
             )
             resGroup.create_dataset(
-                "labelsStrength", shape=memshape, dtype=int, data=strg.reshape(memshape)
+                "labelsStrength",
+                shape=labelshape,
+                dtype=int,
+                data=strg.reshape(labelshape),
             )
             resGroup.create_dataset(
                 "labelsNN", shape=labelshape, dtype=int, data=lblNN.reshape(labelshape)
@@ -111,3 +120,5 @@ for fname in ["dh348_3_2_3", "ico309", "to309_9_4"]:
             resGroup.create_dataset(
                 "memberships", shape=memshape, dtype=int, data=mem.reshape(memshape)
             )
+    t1_stop = perf_counter()
+    print(f"Time for {fname}: {t1_stop - t1_start} s")
