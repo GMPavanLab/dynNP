@@ -228,6 +228,8 @@ def plotTemperatureData(axesdict, T, data, xlims, ylims):
         ax.set_ylim(ylims)
         ax.set_xticks([])
         ax.set_yticks([])
+        ax.set_xlabel("PC1")
+        ax.set_ylabel("PC2")
         for direction in ["left", "bottom"]:
             ax.axis[direction].set_axisline_style("-|>")
 
