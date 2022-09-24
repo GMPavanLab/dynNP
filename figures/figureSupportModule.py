@@ -56,6 +56,18 @@ def dataLoaderBottomUp(filename):
 data = dataLoaderBottomUp("../bottomUp/ico309soap.hdf5")
 
 #%%
+def loadClassification(
+    dataContainer, filename="../bottomUp/ico309classifications.hdf5"
+):
+    with h5py.File(filename, "r") as f:
+        classes = f["/Classifications/ico309-SV_18631-SL_31922-T_300"]
+        for k in classes:
+            T = int(getT.search(k).group(1))
+            dataContainer[T]["labelsNN"] = classes[k]["labelsNN"][:].reshape(-1)
+
+
+loadClassification(data)
+#%%
 def addPseudoFes(tempData, bins=300, rangeHisto=None):
     hist, xedges, yedges = numpy.histogram2d(
         tempData["pca"][:, 0],
@@ -105,7 +117,10 @@ axes.update(createSimulationFigs(grid[3, :].subgridspec(1, 4), fig, name="500"))
 
 for T in [300, 400, 500]:
 
-    axes[f"pca{T}Ax"].scatter(data[T]["pca"][:, 0], data[T]["pca"][:, 1], s=0.1)
+    axes[f"pca{T}Ax"].scatter(
+        data[T]["pca"][:, 0], data[T]["pca"][:, 1], s=0.1, c=data[T]["labelsNN"], vmax=7
+    )
+    print(T, set(data[T]["labelsNN"]))
     pfesPlot = axes[f"pFES{T}Ax"].contourf(
         data[T]["pFESLimitsX"],
         data[T]["pFESLimitsY"],
