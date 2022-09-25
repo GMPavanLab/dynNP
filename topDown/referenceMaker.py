@@ -15,6 +15,7 @@ from SOAPify import (
 from dataclasses import dataclass
 import scipy.cluster.hierarchy as sch
 
+#%%
 FramesRequest = dict(
     ico923_6=dict(
         s_icoVert=(0, 566),
@@ -54,7 +55,8 @@ FramesRequest = dict(
         s_dhEdgelc=(0, 798),
         s_dhEdge=(0, 536),
         s_dhSlimEdge=(0, 1068),
-        s_dhSlimEdgel=(0, 1027),
+        s_dhSlimEdgenv=(0, 1070),
+        s_dhSlimEdgel=(0, 1011),
         s_dhConcaveEdge=(0, 925),
         s_dh111=(0, 670),
         ss_dhHCP=(0, 360),
@@ -64,11 +66,18 @@ FramesRequest = dict(
         b_dhFCC=(0, 399),
         b_dhHCP=(0, 154),
         b_dh5folded=(0, 4),
+        v_dhcon=(0, 924),
+        #        ev_dhcon=(0, 1018),
+        ev_dhcon=(0, 1024),
     ),
     dh1734_5_4_4=dict(
         s_dhconcave=(0, 1130),
         s_dhconcavel=(0, 1132),
         s_dh001=(0, 1643),
+        # ev_dhcon=(0, 1542),
+        # 1130
+        # ev_dhcon1=(0, 1133),
+        # ev_dhcon2=(0, 1542),
     ),
 )
 
@@ -107,10 +116,13 @@ desiredReferenceOrder = [
     "s_dhEdgelc",  # e_cdh_(111)
     "s_dhEdge",  # e_dh_(111)
     "s_dhSlimEdge",  # e__slim
+    "s_dhSlimEdgenv",  # e_nv_slim
     "s_dhSlimEdgel",  # s_slim_(111)
-    "s_dhConcaveEdge",  # v_con_(111) ex v__con
+    "s_dhConcaveEdge",  # v_con_(111)
     "s_dhconcave",  # e__con
     "s_dhconcavel",  # e_v_con
+    "v_dhcon",  # v__con
+    "ev_dhcon",  # ev__con
     "s_dh111",  # s_dh_(111)
     "s_dh001",  # s_dh_(001)
     "ss_dhHCP",  # ss_dh_HCP
@@ -187,7 +199,28 @@ renames = dict(
 )
 
 
+def referenceDendroMaker(reference, orientation="left"):
+    ndataset = len(reference)
+    print(ndataset)
+    wholeDistances = numpy.zeros((int(ndataset * (ndataset - 1) / 2)))
+    cpos = 0
+    for i in range(ndataset):
+        for j in range(i + 1, ndataset):
+            wholeDistances[cpos] = SOAPdistanceNormalized(
+                reference.spectra[i], reference.spectra[j]
+            )
+            cpos += 1
+    sch.dendrogram(
+        sch.linkage(wholeDistances, method="complete"),
+        labels=reference.names,
+        orientation=orientation,
+    )
+
+
 #%%
+
+"""
+##%%
 for NPID in FramesRequest:
     fname = f"{NPID}_minimized.data"
     u = mdaUniverse(fname, atom_style="id type x y z")
@@ -205,7 +238,8 @@ with File("referenceFrames.hdf5", "a") as workFile:
         SOAPlmax=8,
     )
 
-
+##%%
+"""
 references = dict()
 
 with File("referenceFrames.hdf5", "r") as workFile:
@@ -213,6 +247,10 @@ with File("referenceFrames.hdf5", "r") as workFile:
         references[k] = createReferencesFromTrajectory(
             workFile[f"SOAP/{k}"], FramesRequest[k], 8, 8
         )
+# temporary
+#%%
+dhRefs = mergeReferences(*[references[k] for k in references if "dh" in k])
+referenceDendroMaker(mergeReferences(*[references[k] for k in references]), "top")
 #%%
 with File("References.hdf5", "w") as refFile:
     g = refFile.require_group("NPReferences")
@@ -244,31 +282,78 @@ reorderedReferences = SOAPReferences(
 
 
 #%%
-
-
-def referenceDendroMaker(reference):
-    ndataset = len(reference)
-    print(ndataset)
-    wholeDistances = numpy.zeros((int(ndataset * (ndataset - 1) / 2)))
-    cpos = 0
-    for i in range(ndataset):
-        for j in range(i + 1, ndataset):
-            wholeDistances[cpos] = SOAPdistanceNormalized(
-                reference.spectra[i], reference.spectra[j]
-            )
-            cpos += 1
-    sch.dendrogram(
-        sch.linkage(wholeDistances, method="complete"),
-        labels=reference.names,
-        orientation="left",
-    )
-
-
-#%%
 icoRefs = mergeReferences(*[myreferences[k] for k in myreferences if "ico" in k])  # OK!
 toRefs = mergeReferences(*[myreferences[k] for k in myreferences if "to" in k])  # OK!
-dhRefs = mergeReferences(
-    *[myreferences[k] for k in myreferences if "dh" in k]
-)  # -3 envs
 #%%
+# -3 envs
+
+dhRefs = mergeReferences(*[myreferences[k] for k in myreferences if "dh" in k])
+
+
 referenceDendroMaker(dhRefs)
+
+#%%
+from SOAPify import fillSOAPVectorFromdscribe, normalizeArray
+
+with File("referenceFrames.hdf5", "r") as workFile:
+    data1086 = normalizeArray(
+        fillSOAPVectorFromdscribe(workFile[f"SOAP/dh1086_7_1_3"][0, :], 8, 8)
+    )
+    data1734 = normalizeArray(
+        fillSOAPVectorFromdscribe(workFile[f"SOAP/dh1734_5_4_4"][0, :], 8, 8)
+    )
+
+#%%
+t1086 = []
+ref = data1086[924]
+ref = data1086[1011]
+print(SOAPdistanceNormalized(data1086[924], data1086[1011]))
+for i in range(1086):
+    d = SOAPdistanceNormalized(ref, data1086[i])
+    # d2 = SOAPdistanceNormalized(ref2, data1086[i])
+    if d < 0.08 and d > 0.005:
+        t1086.append((i, d))
+print(len(t1086))
+#%%
+t1734 = []
+print(SOAPdistanceNormalized(ref, ref2))
+for i in range(1086):
+    d = SOAPdistanceNormalized(ref, data1734[i])
+    d2 = SOAPdistanceNormalized(ref2, data1734[i])
+    if d < 0.08 and d > 0.005 and d < d2:
+        t1734.append((i, d))
+print(t1734)
+#%%
+ndataset = len(data1086)
+wholeDistances = numpy.zeros((int(ndataset * (ndataset - 1) / 2)))
+cpos = 0
+for i in range(ndataset):
+    for j in range(i + 1, ndataset):
+        wholeDistances[cpos] = SOAPdistanceNormalized(data1086[i], data1086[j])
+        cpos += 1
+
+
+sch.dendrogram(
+    sch.linkage(wholeDistances, method="complete"),
+    # labels=reference.names,
+)
+
+#%%
+def explor(data):
+    t = []
+    ndataset = len(data)
+    for i in [924]:  # range(ndataset):
+        d = SOAPdistanceNormalized(data1086[i], data1086[1011])
+        if d < 0.06 and d > 0.0007:
+            for j in range(ndataset):
+                dd = SOAPdistanceNormalized(data1086[i], data[j])
+                dr = SOAPdistanceNormalized(data1086[1011], data[j])
+                if dd < d and dd > 0.0022:
+                    t.append((i, j, dd))
+    print(len(t))
+    print(t)
+
+
+explor(data1734)
+#%%
+SOAPdistanceNormalized(ref, ref)
