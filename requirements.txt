@@ -1,5 +1,10 @@
 #the main analisys package
-SOAPify @git+https://github.com/GMPavanLab/SOAPify.git@cf32a3311a1c25b223751c0338e1281a33a70fa3
+SOAPify-gmpavanlab @git+https://github.com/GMPavanLab/SOAPify.git@cf32a3311a1c25b223751c0338e1281a33a70fa3
+#graphs
+seaborn
+#ML:
 sklearn
+hdbscan
 #some images are made with ovito
 #ovito
+
