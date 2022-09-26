@@ -1,6 +1,6 @@
 #%%
 from h5py import File
-from HDF5er import saveXYZfromTrajGroup, MDA2HDF5
+from HDF5er import MDA2HDF5
 import numpy
 from MDAnalysis import Universe as mdaUniverse
 from SOAPify import (
@@ -10,6 +10,7 @@ from SOAPify import (
     mergeReferences,
     SOAPdistanceNormalized,
     saveReferences,
+    normalizeArray,
     SOAPReferences,
 )
 from dataclasses import dataclass
@@ -194,56 +195,39 @@ def referenceDendroMaker(reference, orientation="left"):
     )
 
 
-#%%
+def getDefaultReferences():
+    myreferences = dict()
 
-references = dict()
+    with File("References.hdf5", "r") as refFile:
+        g = refFile["NPReferences"]
+        for k in g:
+            myreferences[k] = getReferencesFromDataset(g[k])
 
-with File("referenceFrames.hdf5", "r") as workFile:
-    for k in FramesRequest:
-        references[k] = createReferencesFromTrajectory(
-            workFile[f"SOAP/{k}"], FramesRequest[k], 8, 8
-        )
-# temporary
+    allRefs = mergeReferences(*[myreferences[k] for k in myreferences])
+    allRefs.spectra = normalizeArray(allRefs.spectra)
+    idx = numpy.zeros((len(allRefs.names)), dtype=int)
+    for i, k in enumerate(desiredReferenceOrder):
+        idx[i] = allRefs.names.index(k)
 
-dhRefs = mergeReferences(*[references[k] for k in references if "dh" in k])
-referenceDendroMaker(dhRefs)
-# referenceDendroMaker(mergeReferences(*[references[k] for k in references]), "top")
-#%%
-with File("References.hdf5", "w") as refFile:
-    g = refFile.require_group("NPReferences")
-    for k in references:
-        saveReferences(g, k, references[k])
-#%%
-
-myreferences = dict()
-
-with File("References.hdf5", "r") as refFile:
-    g = refFile["NPReferences"]
-    for k in g:
-        myreferences[k] = getReferencesFromDataset(g[k])
-
-allRefs = mergeReferences(*[myreferences[k] for k in myreferences])
-#%% reoredering references
-
-
-idx = numpy.zeros((len(allRefs.names)), dtype=int)
-for i, k in enumerate(desiredReferenceOrder):
-    idx[i] = allRefs.names.index(k)
-
-reorderedReferences = SOAPReferences(
-    names=desiredReferenceOrder,
-    spectra=allRefs.spectra[idx],
-    lmax=allRefs.lmax,
-    nmax=allRefs.nmax,
-)
+    return SOAPReferences(
+        names=desiredReferenceOrder,
+        spectra=allRefs.spectra[idx],
+        lmax=allRefs.lmax,
+        nmax=allRefs.nmax,
+    )
 
 
 #%%
-icoRefs = mergeReferences(*[myreferences[k] for k in myreferences if "ico" in k])  # OK!
-toRefs = mergeReferences(*[myreferences[k] for k in myreferences if "to" in k])  # OK!
-dhRefs = mergeReferences(*[myreferences[k] for k in myreferences if "dh" in k])
+if __name__ == "__main__":
+    references = dict()
 
+    with File("referenceFrames.hdf5", "r") as workFile:
+        for k in FramesRequest:
+            references[k] = createReferencesFromTrajectory(
+                workFile[f"SOAP/{k}"], FramesRequest[k], 8, 8
+            )
 
-referenceDendroMaker(dhRefs)
-
-#%%
+    with File("References.hdf5", "w") as refFile:
+        g = refFile.require_group("NPReferences")
+        for k in references:
+            saveReferences(g, k, references[k])
