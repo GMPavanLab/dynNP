@@ -103,6 +103,87 @@ def dataLoaderBottomUp(filename):
 #%% Layouts
 
 
+def makeLayout1(figsize, **figkwargs):
+    figsize = numpy.array([2, 1]) * 8
+    fig = plt.figure(figsize=figsize, **figkwargs)
+    mainGrid = fig.add_gridspec(2, 4)
+
+    axes = dict(
+        soapAx=fig.add_subplot(mainGrid[0, 0]),
+        idealAx=fig.add_subplot(mainGrid[0, 1]),
+        idealSlicedAx=fig.add_subplot(mainGrid[0, 2]),
+        legendAx=fig.add_subplot(mainGrid[0, 3]),
+    )
+    axes.update(createSimulationFigs(mainGrid[1, :].subgridspec(1, 4), fig, name="300"))
+    for i, ax in enumerate(
+        [
+            axes["soapAx"],
+            axes["idealAx"],
+            axes["idealSlicedAx"],
+            axes["legendAx"],
+            axes["img300Ax"],
+            axes["pca300Ax"],
+            axes["pFES300Ax"],
+            axes["tmat300Ax"],
+        ]
+    ):
+        ax.set_title(labels[i])
+    return fig, axes
+
+
+def makeLayout2(figsize, **figkwargs):
+    figsize = numpy.array([2, 1]) * 8
+    fig = plt.figure(figsize=figsize, **figkwargs)
+    mainGrid = fig.add_gridspec(2, 4)
+
+    axes = dict()
+    axes.update(createSimulationFigs(mainGrid[0, :].subgridspec(1, 4), fig, name="400"))
+    axes.update(createSimulationFigs(mainGrid[1, :].subgridspec(1, 4), fig, name="500"))
+    for i, ax in enumerate(
+        [
+            axes["img400Ax"],
+            axes["pca400Ax"],
+            axes["pFES400Ax"],
+            axes["tmat400Ax"],
+            axes["img500Ax"],
+            axes["pca500Ax"],
+            axes["pFES500Ax"],
+            axes["tmat500Ax"],
+        ]
+    ):
+        ax.set_title(labels[i])
+    return fig, axes
+
+
+def makeLayout3(figsize, **figkwargs):
+    axes = dict()
+    fig = plt.figure(figsize=figsize, **figkwargs)
+    mainGrid = fig.add_gridspec(nrows=2, ncols=3, width_ratios=[1, 1, 1])
+    NPAxes = mainGrid[:, 0].subgridspec(3, 1, height_ratios=[1, 0.1, 1])
+    axes["NPTime"] = fig.add_subplot(NPAxes[0])
+    axes["NPClasses"] = fig.add_subplot(NPAxes[-1])
+    axes["NPcmap"] = fig.add_subplot(NPAxes[1])
+    for g, n in [
+        (mainGrid[0, 1], "followGraph"),
+        (mainGrid[0, 2], "graphT300"),
+        (mainGrid[1, 1], "graphT400"),
+        (mainGrid[1, 2], "graphT500"),
+    ]:
+        axes[n] = fig.add_subplot(g)
+    for i, ax in enumerate(
+        [
+            axes["NPTime"],
+            axes["NPClasses"],
+            axes["followGraph"],
+            axes["graphT300"],
+            axes["graphT400"],
+            axes["graphT500"],
+        ]
+    ):
+        ax.set_title(labels[i])
+    return fig, axes
+
+
 def makeLayout5(figsize, **figkwargs):
     axes = dict()
     fig = plt.figure(figsize=figsize, **figkwargs)
