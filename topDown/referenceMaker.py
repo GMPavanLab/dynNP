@@ -77,8 +77,7 @@ FramesRequest = dict(
     },
 )
 
-desiredReferenceOrder = [
-    # ico
+desiredReferenceOrderIco = [
     "v_5f_ih",
     "e_(111)_ih",
     "e_(111)_vih",
@@ -91,7 +90,9 @@ desiredReferenceOrder = [
     "b_HCP_ih",
     "b_FCC_ih",
     "b_c_ih",
-    # to
+]
+
+desiredReferenceOrderTo = [
     "v_to",
     "e_(001)_to",
     "e_(001)_vto",
@@ -105,7 +106,9 @@ desiredReferenceOrder = [
     "ss_(001)_to",
     "ss_(111)_to",
     "b_FCC_to",
-    # dh
+]
+
+desiredReferenceOrderDh = [
     "v_5f_dh",
     "v_slim",
     "e_(111)_vdh",
@@ -129,6 +132,10 @@ desiredReferenceOrder = [
     "b_HCP_dh",
     "b_5f_dh",
 ]
+
+desiredReferenceOrder = (
+    desiredReferenceOrderIco + desiredReferenceOrderTo + desiredReferenceOrderDh
+)
 
 
 @dataclass
@@ -211,6 +218,41 @@ def getDefaultReferences():
 
     return SOAPReferences(
         names=desiredReferenceOrder,
+        spectra=allRefs.spectra[idx],
+        lmax=allRefs.lmax,
+        nmax=allRefs.nmax,
+    )
+
+
+def getDefaultReferencesSubdict(NPtype: str):
+    NPtype = NPtype.lower()
+    if NPtype == "ih" or NPtype == "ico":
+        kind = "ico"
+        mydesiredReferenceOrder = desiredReferenceOrderIco
+    elif NPtype == "dh":
+        kind = "dh"
+        mydesiredReferenceOrder = desiredReferenceOrderDh
+    elif NPtype == "to":
+        kind = "to"
+        mydesiredReferenceOrder = desiredReferenceOrderTo
+    else:
+        raise "You can chose only betwee ih, dh or to"
+
+    myreferences = dict()
+
+    with File("References.hdf5", "r") as refFile:
+        g = refFile["NPReferences"]
+        for k in g:
+            myreferences[k] = getReferencesFromDataset(g[k])
+    t = [myreferences[k] for k in myreferences if kind in k]
+    allRefs = mergeReferences(*t) if len(t) > 1 else t[0]
+    allRefs.spectra = normalizeArray(allRefs.spectra)
+    idx = numpy.zeros((len(allRefs.names)), dtype=int)
+    for i, k in enumerate(mydesiredReferenceOrder):
+        idx[i] = allRefs.names.index(k)
+
+    return SOAPReferences(
+        names=mydesiredReferenceOrder,
         spectra=allRefs.spectra[idx],
         lmax=allRefs.lmax,
         nmax=allRefs.nmax,
