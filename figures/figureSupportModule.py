@@ -102,9 +102,13 @@ def dataLoaderBottomUp(filename):
 
 #%% Layouts
 
+__titleDict = dict(
+    fontdict=dict(weight="bold"),
+    loc="left",
+)
+
 
 def makeLayout1(figsize, **figkwargs):
-    figsize = numpy.array([2, 1]) * 8
     fig = plt.figure(figsize=figsize, **figkwargs)
     mainGrid = fig.add_gridspec(2, 4)
 
@@ -127,12 +131,11 @@ def makeLayout1(figsize, **figkwargs):
             axes["tmat300Ax"],
         ]
     ):
-        ax.set_title(labels[i])
+        ax.set_title(labels[i],**__titleDict)
     return fig, axes
 
 
 def makeLayout2(figsize, **figkwargs):
-    figsize = numpy.array([2, 1]) * 8
     fig = plt.figure(figsize=figsize, **figkwargs)
     mainGrid = fig.add_gridspec(2, 4)
 
@@ -151,7 +154,7 @@ def makeLayout2(figsize, **figkwargs):
             axes["tmat500Ax"],
         ]
     ):
-        ax.set_title(labels[i])
+        ax.set_title(labels[i],**__titleDict)
     return fig, axes
 
 
@@ -180,7 +183,7 @@ def makeLayout3(figsize, **figkwargs):
             axes["graphT500"],
         ]
     ):
-        ax.set_title(labels[i])
+        ax.set_title(labels[i],**__titleDict)
     return fig, axes
 
 
@@ -212,7 +215,7 @@ def makeLayout5(figsize, **figkwargs):
             axes["tmat300"],
         ]
     ):
-        ax.set_title(labels[i])
+        ax.set_title(labels[i],**__titleDict)
     return fig, axes
 
 
@@ -238,7 +241,7 @@ def makeLayout6and7(figsize, **figkwargs):
             axes["chord300"],
         ]
     ):
-        ax.set_title(labels[i])
+        ax.set_title(labels[i],**__titleDict)
     return fig, axes
 
 

@@ -162,7 +162,7 @@ def nameFromLabel(s):
     return Names(cat, sub, sup)
 
 
-renames = {k: nameFromLabel(k) for k in desiredReferenceOrder}
+renamer = {k: nameFromLabel(k) for k in desiredReferenceOrder}
 
 
 def prepareReferenceFrames(FramesRequest, fileName="referenceFrames.hdf5"):
@@ -184,7 +184,7 @@ def prepareReferenceFrames(FramesRequest, fileName="referenceFrames.hdf5"):
         )
 
 
-def referenceDendroMaker(reference, orientation="left"):
+def referenceDendroMaker(reference, **dendroKwargs):
     ndataset = len(reference)
     print(ndataset)
     wholeDistances = numpy.zeros((int(ndataset * (ndataset - 1) / 2)))
@@ -197,15 +197,14 @@ def referenceDendroMaker(reference, orientation="left"):
             cpos += 1
     sch.dendrogram(
         sch.linkage(wholeDistances, method="complete"),
-        labels=reference.names,
-        orientation=orientation,
+        **dendroKwargs
     )
 
 
-def getDefaultReferences():
+def getDefaultReferences(refFile="References.hdf5"):
     myreferences = dict()
 
-    with File("References.hdf5", "r") as refFile:
+    with File(refFile, "r") as refFile:
         g = refFile["NPReferences"]
         for k in g:
             myreferences[k] = getReferencesFromDataset(g[k])
@@ -224,7 +223,7 @@ def getDefaultReferences():
     )
 
 
-def getDefaultReferencesSubdict(NPtype: str):
+def getDefaultReferencesSubdict(NPtype: str, refFile="References.hdf5"):
     NPtype = NPtype.lower()
     if NPtype == "ih" or NPtype == "ico":
         kind = "ico"
@@ -240,7 +239,7 @@ def getDefaultReferencesSubdict(NPtype: str):
 
     myreferences = dict()
 
-    with File("References.hdf5", "r") as refFile:
+    with File(refFile, "r") as refFile:
         g = refFile["NPReferences"]
         for k in g:
             myreferences[k] = getReferencesFromDataset(g[k])
