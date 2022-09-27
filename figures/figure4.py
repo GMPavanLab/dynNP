@@ -2,10 +2,10 @@
 import matplotlib.pyplot as plt
 import numpy
 import figureSupportModule as fsm
-from string import ascii_lowercase as labels
+from string import ascii_lowercase as alph
 from matplotlib.image import imread
 import sys
-
+import scipy.cluster.hierarchy as sch
 sys.path.insert(0, "../topDown")
 from referenceMaker import (
     getDefaultReferencesSubdict,
@@ -19,16 +19,24 @@ __titleDict = dict(
     fontdict=dict(weight="bold"),
     loc="left",
 )
+
+
+figsize = numpy.array([4, 3]) * 3
+NPS = ["ico", "dh", "to"]
+refs = {k: getDefaultReferencesSubdict(k, "../topDown/References.hdf5") for k in NPS}
+refs["icodhto"] = getDefaultReferences("../topDown/References.hdf5")
+
+#%%
 def makeLayout4(figsize, **figkwargs):
     fig = plt.figure(figsize=figsize, **figkwargs)
     mainGrid = fig.add_gridspec(4, 2, width_ratios=[1, 3])
-
+    dendroGrid = mainGrid[:3, 1].subgridspec(6, 1, height_ratios=[1, 0.1] * 3)
     axes = dict(
         NPAx=fig.add_subplot(mainGrid[:3, 0]),
-        icoAx=fig.add_subplot(mainGrid[0, 1]),
-        dhAx=fig.add_subplot(mainGrid[1, 1]),
-        toAx=fig.add_subplot(mainGrid[2, 1]),
-        fullAx=fig.add_subplot(mainGrid[3, :]),
+        icoAx=fig.add_subplot(dendroGrid[0]),
+        dhAx=fig.add_subplot(dendroGrid[2]),
+        toAx=fig.add_subplot(dendroGrid[4]),
+        icodhtoAx=fig.add_subplot(mainGrid[3, :]),
     )
     axes["NPAx"].axis("off")
     axes["ico309Im"] = axes["NPAx"].inset_axes([0.0, 0.7, 0.5, 0.15])
@@ -48,26 +56,33 @@ def makeLayout4(figsize, **figkwargs):
             axes["icoAx"],
             axes["dhAx"],
             axes["toAx"],
-            axes["fullAx"],
+            axes["icodhtoAx"],
         ]
     ):
-        ax.set_title(labels[i],**__titleDict)
+        ax.set_title(alph[i], **__titleDict)
     return fig, axes
-
-
-figsize = numpy.array([4, 3]) * 3
-NPS = ["ico", "dh", "to"]
-refs = {k: getDefaultReferencesSubdict(k, "../topDown/References.hdf5") for k in NPS}
-refs["all"] = getDefaultReferences("../topDown/References.hdf5")
-
-#%%
 
 
 fig, axes = makeLayout4(figsize, dpi=300)
 print(axes.keys())
 for k in NPS:
     labels = [renamer[k]() for k in refs[k].names]
-    referenceDendroMaker(refs[k], ax=axes[f"{k}Ax"], labels=labels)
-    # axes[f"{k}Ax"].axis("off")
+    referenceDendroMaker(refs[k], ax=axes[f"{k}Ax"], labels=labels, color_threshold=0)
+    axes[f"{k}Ax"].set_yticks([])
+    for spine in ["top", "right", "bottom", "left"]:
+        axes[f"{k}Ax"].spines[spine].set_visible(False)
+k = "icodhto"
+labels = [renamer[k]() for k in refs[k].names]
+sch.set_link_color_palette(list(fsm.topDownColorMapHex))
+referenceDendroMaker(
+    refs[k],
+    ax=axes[f"{k}Ax"],
+    labels=labels,
+    color_threshold=0.09,
+    above_threshold_color="#999",
+)
+axes[f"{k}Ax"].set_yticks([])
+for spine in ["top", "right", "bottom", "left"]:
+    axes[f"{k}Ax"].spines[spine].set_visible(False)
 
 # %%

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb
 from mpl_toolkits.axisartist.axislines import AxesZero
 import h5py, re, numpy
-from string import ascii_lowercase as labels
+from string import ascii_lowercase as alph
 
 # import colorsys
 from SOAPify import (
@@ -21,18 +21,19 @@ getT = re.compile("T_([0-9]*)")
 #%%
 # ../bottomUp/ico309soap.hdf5
 #
-bottomUpcolorMap = numpy.array(
-    [
-        to_rgb("#00b127"),  # Faces
-        to_rgb("#e00081"),  # Concave
-        to_rgb("#0086ba"),  # 5foldedSS
-        to_rgb("#003ac6"),  # Ico
-        to_rgb("#450055"),  # Bulk
-        to_rgb("#3800a8"),  # SubSurf
-        to_rgb("#bdff0e"),  # Edges
-        to_rgb("#ffe823"),  # Vertexes
-    ]
-)
+
+bottomUpcolorMapHex = [
+    "#00b127",  # Faces
+    "#e00081",  # Concave
+    "#0086ba",  # 5foldedSS
+    "#003ac6",  # Ico
+    "#450055",  # Bulk
+    "#3800a8",  # SubSurf
+    "#bdff0e",  # Edges
+    "#ffe823",  # Vertexes
+]
+bottomUpcolorMap = numpy.array([to_rgb(k) for k in bottomUpcolorMapHex])
+
 bottomUpLabels = [
     "Faces",  # 0
     "Concave",  # 1
@@ -46,20 +47,32 @@ bottomUpLabels = [
 bottomReordering = [7, 6, 0, 1, 2, 5, 4, 3]
 bottomReordering_r = bottomReordering[::-1]
 
-topDownColorMap = numpy.array(
-    [
-        to_rgb("#708090"),  # b
-        to_rgb("#a6cee3"),  # ss
-        to_rgb("#1f78b4"),  # ss'
-        to_rgb("#33a02c"),  # c
-        to_rgb("#b2df8a"),  # c'
-        to_rgb("#e31a1c"),  # s
-        to_rgb("#fdbf6f"),  # e
-        to_rgb("#ff7f00"),  # e'
-        to_rgb("#6a3d9a"),  # v
-        to_rgb("#cab2d6"),  # v'
-    ]
-)
+topDownColorMapHex = [
+    "#708090",  # b
+    "#a6cee3",  # ss
+    "#1f78b4",  # ss'
+    "#33a02c",  # c
+    "#b2df8a",  # c'
+    "#e31a1c",  # s
+    "#fdbf6f",  # e
+    "#ff7f00",  # e'
+    "#6a3d9a",  # v
+    "#cab2d6",  # v'
+]
+topDownColorMap = numpy.array([to_rgb(k) for k in topDownColorMapHex])
+
+topDownLabels = [
+    "b",
+    "ss",
+    "ss'",
+    "c",
+    "c'",
+    "s",
+    "e",
+    "e'",
+    "v",
+    "v'",
+]
 
 
 def getF(proposed: float, concurrentArray, F):
@@ -131,7 +144,7 @@ def makeLayout1(figsize, **figkwargs):
             axes["tmat300Ax"],
         ]
     ):
-        ax.set_title(labels[i],**__titleDict)
+        ax.set_title(alph[i], **__titleDict)
     return fig, axes
 
 
@@ -154,7 +167,7 @@ def makeLayout2(figsize, **figkwargs):
             axes["tmat500Ax"],
         ]
     ):
-        ax.set_title(labels[i],**__titleDict)
+        ax.set_title(alph[i], **__titleDict)
     return fig, axes
 
 
@@ -183,7 +196,7 @@ def makeLayout3(figsize, **figkwargs):
             axes["graphT500"],
         ]
     ):
-        ax.set_title(labels[i],**__titleDict)
+        ax.set_title(alph[i], **__titleDict)
     return fig, axes
 
 
@@ -215,7 +228,7 @@ def makeLayout5(figsize, **figkwargs):
             axes["tmat300"],
         ]
     ):
-        ax.set_title(labels[i],**__titleDict)
+        ax.set_title(alph[i], **__titleDict)
     return fig, axes
 
 
@@ -241,7 +254,7 @@ def makeLayout6and7(figsize, **figkwargs):
             axes["chord300"],
         ]
     ):
-        ax.set_title(labels[i],**__titleDict)
+        ax.set_title(alph[i], **__titleDict)
     return fig, axes
 
 

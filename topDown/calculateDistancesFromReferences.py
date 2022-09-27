@@ -3,8 +3,11 @@ from referenceMaker import getDefaultReferences, getDefaultReferencesSubdict
 from SOAPify import getDistancesFromRefNormalized
 
 
-def calculatedDistancesAndSave(references, SOAPFileName, classificationFileh5ls):
-    with File(SOAPFileName, "r") as workFile, File(classificationFile, "a") as distFile:
+def calculatedDistancesAndSave(references, SOAPFileName, classificationFile):
+
+    with File(
+        SOAPFileName, "r" if SOAPFileName != classificationFile else "a"
+    ) as workFile, File(classificationFile, "a") as distFile:
         g = workFile[f"SOAP"]
         distG = distFile.require_group("Distances")
         for key in g.keys():
@@ -17,12 +20,13 @@ def calculatedDistancesAndSave(references, SOAPFileName, classificationFileh5ls)
                 dgd.attrs["Reference"] = f"{refFile}/{refKey}"
                 dgd.attrs["names"] = references[refKey].names
 
-    # with File(SOAPFileName, "r") as workFile:
-    #    g=workFile[f"SOAP"]
-    #    for key in g.keys():
-    #        t.append((key,references,SOAPFileName))
-    # with Pool(processes=len(t)) as p:
-    #    p.starmap(calculatedDistancesAndSave,t)
+
+# with File(SOAPFileName, "r") as workFile:
+#    g=workFile[f"SOAP"]
+#    for key in g.keys():
+#        t.append((key,references,SOAPFileName))
+# with Pool(processes=len(t)) as p:
+#    p.starmap(calculatedDistancesAndSave,t)
 
 
 if __name__ == "__main__":
@@ -33,7 +37,7 @@ if __name__ == "__main__":
     for NPname in ["ico309", "dh348_3_2_3", "to309_9_4"]:
         SOAPFileName = f"../bottomUp/{NPname}soap.hdf5"
         classificationFile = f"{NPname}TopBottom.hdf5"
-        calculatedDistancesAndSave(references, SOAPFileName, classificationFile)
+        # calculatedDistancesAndSave(references, SOAPFileName, classificationFile)
     calculatedDistancesAndSave(
         references, "referenceFrames.hdf5", "referenceFrames.hdf5"
     )
