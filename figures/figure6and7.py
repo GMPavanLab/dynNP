@@ -1,6 +1,4 @@
 #%%
-from calendar import c
-from turtle import position, width
 import matplotlib.pyplot as plt
 import numpy
 import figureSupportModule as fsm
@@ -83,17 +81,21 @@ def AddTmatsAndChord(axesdict, data, T, zoom=0.01):
     )
 
 
-def HistoMaker(ax, data, reshuffler=None):
+def HistoMaker(ax, data, positions=None):
+
     nHisto = len(topDownLabels)
+    if positions is None:
+        positions = range(nHisto)
+    labelsFromPositions = [positions.index(k) for k in range(nHisto)]
     t = data["Ideal"]["Class"]
     order = ["Ideal", 300, 400, 500]
     countMean = {T: numpy.zeros((nHisto), dtype=float) for T in data}
     countDev = {T: numpy.zeros((nHisto), dtype=float) for T in data}
     pos = {T: numpy.zeros((nHisto), dtype=float) for T in order}
 
-    positions = range(nHisto)
-    width = 0.1
-    space = 0.1
+    # positions = range(nHisto)
+    width = 0.15
+    space = 0.05
     D = 4 * width + 3 * space
     for c in range(nHisto):
         countMean["Ideal"][c] = numpy.count_nonzero(t.references[0] == c)
@@ -107,13 +109,26 @@ def HistoMaker(ax, data, reshuffler=None):
             countC = numpy.count_nonzero(data[T]["Class"].references == c, axis=-1)
             countMean[T][c] = numpy.mean(countC)
             countDev[T][c] = numpy.std(countC)
-    ax.set_xticks(range(nHisto), topDownLabels)
-
+    ax.set_xticks(range(nHisto), [topDownLabels[k] for k in labelsFromPositions])
+    styles = {
+        "Ideal": dict(edgecolor="k"),
+        300: dict(),
+        400: dict(hatch="///", edgecolor="w"),
+        500: dict(hatch="\\\\\\", edgecolor="w"),
+    }
     for T in data:
-        ax.bar(pos[T], countMean[T], yerr=countDev[T], width=width, align="edge")
+        ax.bar(
+            pos[T],
+            countMean[T],
+            yerr=countDev[T],
+            width=width,
+            align="edge",
+            color=[topDownColorMap[k] for k in positions],  # labelsFromPositions],
+            **styles[T],
+        )
 
 
-figsize = numpy.array([4, 3]) * 3
+figsize = numpy.array([3.8, 3]) * 4
 fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
 
 
@@ -122,8 +137,8 @@ for T in [300, 400, 500]:
     AddTmatsAndChord(axes, data["dh348_3_2_3"][T], T)
     # AddTmats(axes, data["dh348_3_2_3"][T], T)
 
-HistoMaker(axes["Histo"], data["dh348_3_2_3"])
-# todo: histo
+HistoMaker(axes["Histo"], data["dh348_3_2_3"], positions=[0, 1, 2, 9, 8, 3, 7, 5, 6, 4])
+
 # %%
 
 
