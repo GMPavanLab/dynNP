@@ -4,8 +4,10 @@ import numpy
 import figureSupportModule as fsm
 from string import ascii_lowercase as alph
 from matplotlib.image import imread
-import sys
 import scipy.cluster.hierarchy as sch
+
+import sys
+
 sys.path.insert(0, "../topDown")
 from referenceMaker import (
     getDefaultReferencesSubdict,
@@ -13,6 +15,7 @@ from referenceMaker import (
     referenceDendroMaker,
     renamer,
 )
+
 
 #%%
 __titleDict = dict(
@@ -78,7 +81,7 @@ referenceDendroMaker(
     refs[k],
     ax=axes[f"{k}Ax"],
     labels=labels,
-    color_threshold=0.09,
+    color_threshold=0.08,
     above_threshold_color="#999",
 )
 axes[f"{k}Ax"].set_yticks([])
@@ -86,3 +89,15 @@ for spine in ["top", "right", "bottom", "left"]:
     axes[f"{k}Ax"].spines[spine].set_visible(False)
 
 # %%
+topDownLabels = [
+    "b",  # 0
+    "ss",  # 1
+    "ss'",  # 2
+    "c",  # 5
+    "c'",  # 3
+    "s",  # 4
+    "e",  # 6
+    "e'",  # 7
+    "v'",  # 9
+    "v",  # 8
+]

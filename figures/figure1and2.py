@@ -11,9 +11,9 @@ fsm.loadClassification(data)
 fsm.addPseudoFes(data[300], 150, rangeHisto=[data["xlims"], data["ylims"]])
 fsm.addPseudoFes(data[400], 150, rangeHisto=[data["xlims"], data["ylims"]])
 fsm.addPseudoFes(data[500], 150, rangeHisto=[data["xlims"], data["ylims"]])
-fsm.addTmat(data[300])
-fsm.addTmat(data[400])
-fsm.addTmat(data[500])
+fsm.addTmatBU(data[300], 309)
+fsm.addTmatBU(data[400], 309)
+fsm.addTmatBU(data[500], 309)
 #%%
 # for fig 1
 figsize = numpy.array([2, 1]) * 8

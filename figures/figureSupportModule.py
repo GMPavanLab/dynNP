@@ -9,6 +9,7 @@ from string import ascii_lowercase as alph
 # import colorsys
 from SOAPify import (
     transitionMatrixFromSOAPClassificationNormalized as tmatMaker,
+    transitionMatrixFromSOAPClassification as tmatMakerNN,
     SOAPclassification,
 )
 import seaborn
@@ -56,23 +57,91 @@ topDownColorMapHex = [
     "#e31a1c",  # s
     "#fdbf6f",  # e
     "#ff7f00",  # e'
-    "#6a3d9a",  # v
     "#cab2d6",  # v'
+    "#6a3d9a",  # v
 ]
 topDownColorMap = numpy.array([to_rgb(k) for k in topDownColorMapHex])
 
 topDownLabels = [
-    "b",
-    "ss",
-    "ss'",
-    "c",
-    "c'",
-    "s",
-    "e",
-    "e'",
-    "v",
-    "v'",
+    "b",  # 0 -> 0
+    "ss",  # 1 -> 1
+    "ss'",  # 2 -> 2
+    "c",  # 5 -> 3
+    "c'",  # 3 -> 4
+    "s",  # 4 -> 5
+    "e",  # 6 -> 6
+    "e'",  # 7 -> 7
+    "v'",  # 9 -> 8
+    "v",  # 8 -> 9
 ]
+# ho cluster are ordered in fcluster
+topDownLabelFound = [
+    "b",  # 0 -> 0
+    "ss",  # 1 -> 1
+    "ss'",  # 2 -> 2
+    "c'",  # 3 -> 4
+    "s",  # 4 -> 5
+    "c",  # 5 -> 3
+    "e",  # 6 -> 6
+    "e'",  # 7 -> 7
+    "v",  # 8 -> 9
+    "v'",  # 9 -> 8
+]
+topDownReordering = [0, 1, 2, 5, 3, 4, 6, 7, 9, 8]
+# [0, 1, 2, 4, 5, 3, 6, 7, 9, 8]
+# this is the returnn of [topDownLabels.index(k) for k in topDownLabelFound]
+# applied on fcluster
+topDownClusters = numpy.array(
+    [
+        9,
+        6,
+        7,
+        5,
+        5,
+        2,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        8,
+        7,
+        7,
+        7,
+        7,
+        5,
+        5,
+        5,
+        5,
+        2,
+        1,
+        1,
+        0,
+        9,
+        9,
+        7,
+        6,
+        6,
+        8,
+        8,
+        4,
+        7,
+        3,
+        3,
+        4,
+        4,
+        5,
+        5,
+        1,
+        1,
+        2,
+        1,
+        0,
+        0,
+        0,
+    ]
+)
 
 
 def getF(proposed: float, concurrentArray, F):
@@ -350,10 +419,18 @@ def getCompactedAnnotationsForTmat_percent(tmat) -> list:
     return annot
 
 
-def addTmat(tempData):
+def addTmatBU(tempData, nat):
     tempData["tmat"] = tmatMaker(
-        SOAPclassification([], tempData["labelsNN"].reshape(-1, 309), bottomUpLabels)
+        SOAPclassification([], tempData["labelsNN"].reshape(-1, nat), bottomUpLabels)
     )[bottomReordering_r][:, bottomReordering_r]
+
+
+def addTmatTD(tempData):
+    tempData["tmat"] = tmatMaker(tempData["Class"])
+
+
+def addTmatNNTD(tempData):
+    tempData["tmatNN"] = tmatMakerNN(tempData["Class"])
 
 
 #%%

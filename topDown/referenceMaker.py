@@ -184,9 +184,8 @@ def prepareReferenceFrames(FramesRequest, fileName="referenceFrames.hdf5"):
         )
 
 
-def referenceDendroMaker(reference, **dendroKwargs):
+def elaborateDistancesFronReferences(reference: SOAPReferences) -> numpy.ndarray:
     ndataset = len(reference)
-    print(ndataset)
     wholeDistances = numpy.zeros((int(ndataset * (ndataset - 1) / 2)))
     cpos = 0
     for i in range(ndataset):
@@ -195,10 +194,19 @@ def referenceDendroMaker(reference, **dendroKwargs):
                 reference.spectra[i], reference.spectra[j]
             )
             cpos += 1
-    sch.dendrogram(
-        sch.linkage(wholeDistances, method="complete"),
-        **dendroKwargs
+    return wholeDistances
+
+
+def getClustersFromReference(reference: SOAPReferences, **fclusterKwargs):
+    wholeDistances = elaborateDistancesFronReferences(reference)
+    return sch.fcluster(
+        sch.linkage(wholeDistances, method="complete"), **fclusterKwargs
     )
+
+
+def referenceDendroMaker(reference: SOAPReferences, **dendroKwargs) -> numpy.ndarray:
+    wholeDistances = elaborateDistancesFronReferences(reference)
+    sch.dendrogram(sch.linkage(wholeDistances, method="complete"), **dendroKwargs)
 
 
 def getDefaultReferences(refFile="References.hdf5"):
