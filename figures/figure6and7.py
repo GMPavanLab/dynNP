@@ -1,4 +1,6 @@
 #%%
+from calendar import c
+from turtle import position, width
 import matplotlib.pyplot as plt
 import numpy
 import figureSupportModule as fsm
@@ -19,7 +21,23 @@ reT = re.compile("T_([0-9]*)")
 
 
 def getT(s):
-    return int(reT.search(s).group(1))
+    match = reT.search(s)
+    if match:
+        return int(match.group(1))
+    else:
+        return "Ideal"
+
+
+def dataGetter(classificationFile: str, data: dict):
+    with h5py.File(classificationFile, "r") as distFile:
+        ClassG = distFile["Classifications/icotodh"]
+        for k in ClassG:
+            if NPname in k:
+                T = getT(k)
+                data[T] = dict()
+                classification = ClassG[k][:]
+                clusterized = topDownClusters[classification]
+                data[T]["Class"] = SOAPclassification([], clusterized, topDownLabels)
 
 
 #%% Loading Data
@@ -28,20 +46,14 @@ data = {}
 for NPname in ["dh348_3_2_3", "to309_9_4"]:
     data[NPname] = dict()
     classificationFile = f"../topDown/{NPname}TopBottom.hdf5"
-    with h5py.File(classificationFile, "r") as distFile:
-        ClassG = distFile["Classifications/icotodh"]
-        for k in ClassG:
-            if NPname in k:
-                T = getT(k)
-                data[NPname][T] = dict()
-                classification = ClassG[k][:]
-                clusterized = topDownClusters[classification]
-                data[NPname][T]["Class"] = SOAPclassification(
-                    [], clusterized, topDownLabels
-                )
+    dataGetter(classificationFile, data[NPname])
+    dataGetter("../minimized.hdf5", data[NPname])
+
 
 for NP in data:
     for T in data[NP]:
+        if T == "Ideal":
+            continue
         fsm.addTmatTD(data[NP][T])
         fsm.addTmatNNTD(data[NP][T])
 
@@ -71,32 +83,48 @@ def AddTmatsAndChord(axesdict, data, T, zoom=0.01):
     )
 
 
+def HistoMaker(ax, data, reshuffler=None):
+    nHisto = len(topDownLabels)
+    t = data["Ideal"]["Class"]
+    order = ["Ideal", 300, 400, 500]
+    countMean = {T: numpy.zeros((nHisto), dtype=float) for T in data}
+    countDev = {T: numpy.zeros((nHisto), dtype=float) for T in data}
+    pos = {T: numpy.zeros((nHisto), dtype=float) for T in order}
+
+    positions = range(nHisto)
+    width = 0.1
+    space = 0.1
+    D = 4 * width + 3 * space
+    for c in range(nHisto):
+        countMean["Ideal"][c] = numpy.count_nonzero(t.references[0] == c)
+        countDev["Ideal"] = None
+        dev = -D / 2
+        for T in order:
+            pos[T][c] = positions[c] + dev
+            dev += width + space
+            if T == "Ideal":
+                continue
+            countC = numpy.count_nonzero(data[T]["Class"].references == c, axis=-1)
+            countMean[T][c] = numpy.mean(countC)
+            countDev[T][c] = numpy.std(countC)
+    ax.set_xticks(range(nHisto), topDownLabels)
+
+    for T in data:
+        ax.bar(pos[T], countMean[T], yerr=countDev[T], width=width, align="edge")
+
+
 figsize = numpy.array([4, 3]) * 3
 fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
 
 
 for T in [300, 400, 500]:
 
-    AddTmatsAndChord(axes, data["to309_9_4"][T], T)
+    AddTmatsAndChord(axes, data["dh348_3_2_3"][T], T)
     # AddTmats(axes, data["dh348_3_2_3"][T], T)
 
-
+HistoMaker(axes["Histo"], data["dh348_3_2_3"])
 # todo: histo
 # %%
-
-[
-    "npIdeal",
-    "np300",
-    "tmat300",
-    "chord300",
-    "np400",
-    "tmat400",
-    "chord400",
-    "np500",
-    "tmat500",
-    "chord500",
-    "Histo",
-]
 
 
 #%%
