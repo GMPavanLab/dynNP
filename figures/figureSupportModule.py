@@ -16,7 +16,15 @@ import seaborn
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from matplotlib.image import imread
 
-getT = re.compile("T_([0-9]*)")
+__reT = re.compile("T_([0-9]*)")
+
+
+def getT(s):
+    match = __reT.search(s)
+    if match:
+        return int(match.group(1))
+    else:
+        return "Ideal"
 
 
 #%%
@@ -164,7 +172,7 @@ def dataLoaderBottomUp(filename):
     with h5py.File(filename, "r") as f:
         pcas = f["/PCAs/ico309-SV_18631-SL_31922-T_300"]
         for k in pcas:
-            T = int(getT.search(k).group(1))
+            T = getT(k)
             dataContainer[T] = dict(pca=pcas[k][:, :, :2].reshape(-1, 2))
             dataContainer["xlims"][0] = getMin(
                 dataContainer["xlims"][0], dataContainer[T]["pca"][:, 0]
@@ -180,6 +188,18 @@ def dataLoaderBottomUp(filename):
             )
 
     return dataContainer
+
+
+def dataLoaderTopDown(classificationFile: str, data: dict, NPname: str):
+    with h5py.File(classificationFile, "r") as distFile:
+        ClassG = distFile["Classifications/icotodh"]
+        for k in ClassG:
+            if NPname in k:
+                T = getT(k)
+                data[T] = dict()
+                classification = ClassG[k][:]
+                clusterized = topDownClusters[classification]
+                data[T]["Class"] = SOAPclassification([], clusterized, topDownLabels)
 
 
 #%% Layouts
@@ -328,13 +348,13 @@ def makeLayout6and7(figsize, **figkwargs):
 
 
 #%%
-def loadClassification(
+def loadClassificationButtomUp(
     dataContainer, filename="../bottomUp/ico309classifications.hdf5"
 ):
     with h5py.File(filename, "r") as f:
         classes = f["/Classifications/ico309-SV_18631-SL_31922-T_300"]
         for k in classes:
-            T = int(getT.search(k).group(1))
+            T = getT(k)
             dataContainer[T]["labelsNN"] = classes[k]["labelsNN"][:].reshape(-1)
 
 

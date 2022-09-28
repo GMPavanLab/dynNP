@@ -6,7 +6,7 @@ from matplotlib.image import imread
 
 #%%
 data = fsm.dataLoaderBottomUp("../bottomUp/ico309soap.hdf5")
-fsm.loadClassification(data)
+fsm.loadClassificationButtomUp(data)
 
 fsm.addPseudoFes(data[300], 150, rangeHisto=[data["xlims"], data["ylims"]])
 fsm.addPseudoFes(data[400], 150, rangeHisto=[data["xlims"], data["ylims"]])
