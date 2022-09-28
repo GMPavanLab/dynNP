@@ -196,7 +196,8 @@ def dataLoaderTopDown(classificationFile: str, data: dict, NPname: str):
         for k in ClassG:
             if NPname in k:
                 T = getT(k)
-                data[T] = dict()
+                if T not in data:
+                    data[T] = dict()
                 classification = ClassG[k][:]
                 clusterized = topDownClusters[classification]
                 data[T]["Class"] = SOAPclassification([], clusterized, topDownLabels)
@@ -348,9 +349,7 @@ def makeLayout6and7(figsize, **figkwargs):
 
 
 #%%
-def loadClassificationButtomUp(
-    dataContainer, filename="../bottomUp/ico309classifications.hdf5"
-):
+def loadClassificationBottomUp(dataContainer, filename):
     with h5py.File(filename, "r") as f:
         classes = f["/Classifications/ico309-SV_18631-SL_31922-T_300"]
         for k in classes:
@@ -555,4 +554,4 @@ def colorBarExporter(listOfColors, filename=None):
 
 
 # colorBarExporter(topDownColorMap[::-1], "topDownCMAP.png")
-# colorBarExporter(bottomUpcolorMap[::-1], "bottomUpCMAP.png")
+# colorBarExporter(bottomUpcolorMap[::-1], "bottomUPCMAP.png")
