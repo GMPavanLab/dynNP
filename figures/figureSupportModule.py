@@ -327,7 +327,13 @@ def makeLayout5(figsize, **figkwargs):
 def makeLayout6and7(figsize, **figkwargs):
     axes = dict()
     fig = plt.figure(figsize=figsize, **figkwargs)
-    mainGrid = fig.add_gridspec(nrows=3, ncols=2, width_ratios=[3, 1], wspace=0.1)
+    mainGrid = fig.add_gridspec(
+        nrows=3,
+        ncols=2,
+        height_ratios=[0.8, 1.2, 1],
+        width_ratios=[3, 1],
+        wspace=0.1,
+    )
     npGrid = mainGrid[0, 0].subgridspec(1, 4)
     tmatGrid = mainGrid[2, 0].subgridspec(1, 4, width_ratios=[1, 1, 1, 0.05])
     chordGrid = mainGrid[:, 1].subgridspec(3, 1)
@@ -362,7 +368,6 @@ def loadClassificationBottomUp(dataContainer, filename):
         for k in Simulations:
             T = getT(k)
             dataContainer[T]["labelsNN"] = Simulations[k]["labelsNN"][:].reshape(-1)
-
 
 
 #%%
@@ -490,8 +495,8 @@ def AddTmatsAndChord5_6_7(axesdict, data, T, zoom=0.01, cbarAx=None, **tmatOptio
 def HistoMaker(
     ax: plt.Axes,
     data: dict,
-    width: float = 0.15,
-    space: float = 0.05,
+    barWidth: float = 0.15,
+    barSpace: float = 0.05,
     arrowLenght: float = 0.25,
     positions=None,
 ):
@@ -505,14 +510,14 @@ def HistoMaker(
     countDev = {T: numpy.zeros((nHisto), dtype=float) for T in data}
     pos = {T: numpy.zeros((nHisto), dtype=float) for T in order}
 
-    barsSpace = 4 * width + 3 * space
+    barsDim = 4 * barWidth + 3 * barSpace
     for c in range(nHisto):
         countMean["Ideal"][c] = numpy.count_nonzero(t.references[0] == c)
         countDev["Ideal"] = None
-        dev = -barsSpace / 2
+        dev = -barsDim / 2
         for T in order:
             pos[T][c] = positions[c] + dev
-            dev += width + space
+            dev += barWidth + barSpace
             if T == "Ideal":
                 continue
             countC = numpy.count_nonzero(data[T]["Class"].references == c, axis=-1)
@@ -532,16 +537,18 @@ def HistoMaker(
             pos[T],
             countMean[T],
             yerr=countDev[T],
-            width=width,
+            width=barWidth,
             align="edge",
             color=topDownColorMap,
             **styles[T],
         )
     _, axylim = ax.get_ylim()
+    scaleAx = 0.8
+    ax.set_xlim(-barsDim * scaleAx, nHisto - 1 + barsDim * scaleAx)
     ax.set_ylabel("Mean Number of Atoms")
     for c in range(nHisto):
         if countMean["Ideal"][c] == 0:
-            arrowXPos = pos["Ideal"][c] + width / 2
+            arrowXPos = pos["Ideal"][c] + barWidth / 2
             ax.annotate(
                 "",
                 xy=(arrowXPos, 0),

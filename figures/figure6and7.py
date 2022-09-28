@@ -29,37 +29,6 @@ for NP in data:
 #%%
 
 
-def makeLayout6and7(figsize, **figkwargs):
-    axes = dict()
-    fig = plt.figure(figsize=figsize, **figkwargs)
-    mainGrid = fig.add_gridspec(nrows=3, ncols=2, width_ratios=[3, 1], wspace=0.1)
-    npGrid = mainGrid[0, 0].subgridspec(1, 4)
-    tmatGrid = mainGrid[2, 0].subgridspec(1, 4, width_ratios=[1, 1, 1, 0.05])
-    chordGrid = mainGrid[:, 1].subgridspec(3, 1)
-    axes[f"npIdeal"] = fig.add_subplot(npGrid[0])
-    for i, T in enumerate([300, 400, 500]):
-        axes[f"np{T}"] = fig.add_subplot(npGrid[i + 1])
-        axes[f"tmat{T}"] = fig.add_subplot(tmatGrid[i])
-        axes[f"chord{T}"] = fig.add_subplot(chordGrid[i])
-    axes[f"tmatCMAP"] = fig.add_subplot(tmatGrid[3])
-    axes[f"nps"] = fig.add_subplot(npGrid[:])
-    axes[f"tmats"] = fig.add_subplot(tmatGrid[:])
-    axes[f"chords"] = fig.add_subplot(chordGrid[:])
-    axes["Histo"] = fig.add_subplot(mainGrid[1, 0])
-    for i, ax in enumerate(
-        [
-            axes["nps"],
-            axes["Histo"],
-            axes["tmats"],
-            axes["chords"],
-        ]
-    ):
-        ax.set_title(alph[i], **__titleDict)
-    for ax in [axes["nps"], axes["tmats"], axes["chords"]]:
-        ax.axis("off")
-    return fig, axes
-
-
 def addNPImages(axes, data, NP):
     clusters0K = []
     NClasses = 10
@@ -93,7 +62,8 @@ def addNPImages(axes, data, NP):
             p[0] = numpy.mean(clusterCountID)
             p += [numpy.mean(clusterCountNotID)]
         axes[f"np{T}"].imshow(imread(f"{NP}_{T}-topDown.png"))
-        axes[f"np{T}"].set_title(f"{T}")
+        title = f"{T}\u2009K" if T != "Ideal" else "Ideal"
+        axes[f"np{T}"].set_title(title)
         pieax = axes[f"np{T}"].inset_axes([0.7, -0.2, 0.3, 0.3])
         axes[f"np{T}"].axis("off")
         pieax.set_box_aspect(1)
@@ -110,10 +80,10 @@ def addNPImages(axes, data, NP):
         )
 
 
-for NP in ["dh348_3_2_3", "to309_9_4"]:
+for i, NP in enumerate(["dh348_3_2_3", "to309_9_4"], 6):
     figsize = numpy.array([3.8, 3]) * 4
     # fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
-    fig, axes = makeLayout6and7(figsize, dpi=300)
+    fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
     addNPImages(axes, data[NP], NP)
     for T in [300, 400, 500]:
         fsm.AddTmatsAndChord5_6_7(
@@ -126,7 +96,14 @@ for NP in ["dh348_3_2_3", "to309_9_4"]:
         )
 
     # todo: add the arrows
-    fsm.HistoMaker(axes["Histo"], data[NP], positions=[0, 1, 2, 9, 8, 3, 7, 5, 6, 4])
+    fsm.HistoMaker(
+        axes["Histo"],
+        data[NP],
+        positions=[0, 1, 2, 9, 8, 3, 7, 5, 6, 4],
+        barWidth=0.16,
+        barSpace=0.05,
+    )
+    fig.savefig(f"figure{i}.png", bbox_inches="tight", pad_inches=0)
 
 
 #%%
