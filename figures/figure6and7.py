@@ -81,12 +81,11 @@ def AddTmatsAndChord(axesdict, data, T, zoom=0.01):
     )
 
 
-def HistoMaker(ax, data, positions=None):
+def HistoMaker(ax: plt.Axes, data, positions=None):
 
     nHisto = len(topDownLabels)
     if positions is None:
         positions = range(nHisto)
-    labelsFromPositions = [positions.index(k) for k in range(nHisto)]
     t = data["Ideal"]["Class"]
     order = ["Ideal", 300, 400, 500]
     countMean = {T: numpy.zeros((nHisto), dtype=float) for T in data}
@@ -109,7 +108,9 @@ def HistoMaker(ax, data, positions=None):
             countC = numpy.count_nonzero(data[T]["Class"].references == c, axis=-1)
             countMean[T][c] = numpy.mean(countC)
             countDev[T][c] = numpy.std(countC)
-    ax.set_xticks(range(nHisto), [topDownLabels[k] for k in labelsFromPositions])
+    ax.set_xticks(
+        range(nHisto), [topDownLabels[positions.index(k)] for k in range(nHisto)]
+    )
     styles = {
         "Ideal": dict(edgecolor="k"),
         300: dict(),
@@ -123,21 +124,34 @@ def HistoMaker(ax, data, positions=None):
             yerr=countDev[T],
             width=width,
             align="edge",
-            color=[topDownColorMap[k] for k in positions],  # labelsFromPositions],
+            color=topDownColorMap,
             **styles[T],
         )
+    _, axylim = ax.get_ylim()
+    ax.set_ylabel("Mean Number of Atoms")
+    for c in range(nHisto):
+        if countMean["Ideal"][c] == 0:
+            arrowXPos=pos["Ideal"][c] + width / 2
+            ax.annotate(
+                "",
+                xy=(arrowXPos, 0),
+                xycoords='data',
+                xytext=(arrowXPos, axylim*0.25),
+                arrowprops=dict(arrowstyle="->",
+                            connectionstyle="arc3"),
+            )
 
 
-figsize = numpy.array([3.8, 3]) * 4
-fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
+for NP in ["dh348_3_2_3", "to309_9_4"]:
+    figsize = numpy.array([3.8, 3]) * 4
+    fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
 
+    for T in [300, 400, 500]:
 
-for T in [300, 400, 500]:
+        AddTmatsAndChord(axes, data[NP][T], T)
 
-    AddTmatsAndChord(axes, data["dh348_3_2_3"][T], T)
-    # AddTmats(axes, data["dh348_3_2_3"][T], T)
-
-HistoMaker(axes["Histo"], data["dh348_3_2_3"], positions=[0, 1, 2, 9, 8, 3, 7, 5, 6, 4])
+    # todo: add the arrows
+    HistoMaker(axes["Histo"], data[NP], positions=[0, 1, 2, 9, 8, 3, 7, 5, 6, 4])
 
 # %%
 
