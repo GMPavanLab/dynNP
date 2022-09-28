@@ -54,3 +54,4 @@ for classificationNAME in ["bottomUP", "topDown"]:
             renderer=renderer,
             frame=myData["frame"],
         )
+    pipeline.remove_from_scene()

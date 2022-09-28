@@ -1,20 +1,11 @@
 #%%
-from turtle import width
+
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
+
 from matplotlib.image import imread
 import figureSupportModule as fsm
 
-from figureSupportModule import (
-    topDownLabels,
-    topDownColorMap,
-    decorateTmatWithLegend,
-    __titleDict,
-    alph,
-)
-
-import numpy, seaborn
-from chorddiagram import ChordDiagram
+import numpy
 
 
 #%% Loading Data
@@ -69,109 +60,63 @@ def makeLayout6and7(figsize, **figkwargs):
     return fig, axes
 
 
-def AddTmatsAndChord5_6_7(axesdict, data, T, zoom=0.01, cbarAx=None, **tmatOptions):
-    reorder = list(range(10))  # [0, 1, 2, 5, 3, 4, 6, 7, 9, 8]
-    mask = data["tmat"] == 0
-    seaborn.heatmap(
-        data["tmat"],
-        ax=axesdict[f"tmat{T}"],
-        fmt="s",
-        annot=None,
-        mask=mask,
-        square=True,
-        cmap="rocket_r",
-        vmax=1,
-        vmin=0,
-        cbar=cbarAx is not None,
-        cbar_ax=cbarAx,
-        xticklabels=False,
-        yticklabels=False,
-        **tmatOptions,
-    )
-    decorateTmatWithLegend("topDown", reorder, axesdict[f"tmat{T}"], zoom=zoom)
-    ChordDiagram(
-        data["tmatNN"], colors=topDownColorMap, ax=axesdict[f"chord{T}"], onlyFlux=True
-    )
-    for ax in [axesdict[f"chord{T}"], axesdict[f"tmat{T}"]]:
-        ax.set_title(f"{T}\u2009K")
-
-
-def HistoMaker(
-    ax: plt.Axes,
-    data: dict,
-    width: float = 0.15,
-    space: float = 0.05,
-    arrowLenght: float = 0.25,
-    positions=None,
-):
-
-    nHisto = len(topDownLabels)
-    if positions is None:
-        positions = range(nHisto)
-    t = data["Ideal"]["Class"]
-    order = ["Ideal", 300, 400, 500]
-    countMean = {T: numpy.zeros((nHisto), dtype=float) for T in data}
-    countDev = {T: numpy.zeros((nHisto), dtype=float) for T in data}
-    pos = {T: numpy.zeros((nHisto), dtype=float) for T in order}
-
-    barsSpace = 4 * width + 3 * space
-    for c in range(nHisto):
-        countMean["Ideal"][c] = numpy.count_nonzero(t.references[0] == c)
-        countDev["Ideal"] = None
-        dev = -barsSpace / 2
-        for T in order:
-            pos[T][c] = positions[c] + dev
-            dev += width + space
-            if T == "Ideal":
-                continue
-            countC = numpy.count_nonzero(data[T]["Class"].references == c, axis=-1)
-            countMean[T][c] = numpy.mean(countC)
-            countDev[T][c] = numpy.std(countC)
-    ax.set_xticks(
-        range(nHisto), [topDownLabels[positions.index(k)] for k in range(nHisto)]
-    )
-    styles = {
-        "Ideal": dict(edgecolor="k", alpha=0.5),
-        300: dict(edgecolor="w"),
-        400: dict(hatch="///", edgecolor="w"),
-        500: dict(hatch="\\\\\\", edgecolor="w"),
-    }
-    for T in data:
-        ax.bar(
-            pos[T],
-            countMean[T],
-            yerr=countDev[T],
-            width=width,
-            align="edge",
-            color=topDownColorMap,
-            **styles[T],
-        )
-    _, axylim = ax.get_ylim()
-    ax.set_ylabel("Mean Number of Atoms")
-    for c in range(nHisto):
-        if countMean["Ideal"][c] == 0:
-            arrowXPos = pos["Ideal"][c] + width / 2
-            ax.annotate(
-                "",
-                xy=(arrowXPos, 0),
-                xycoords="data",
-                xytext=(arrowXPos, axylim * arrowLenght),
-                arrowprops=dict(arrowstyle="->", connectionstyle="arc3"),
+def addNPImages(axes, data, NP):
+    clusters0K = []
+    NClasses = 10
+    for T in ["Ideal", 300, 400, 500]:
+        p = [1.0]
+        if T == "Ideal":
+            ideal = data[T]["Class"].references[0]
+            clusters0K += [
+                c for c in range(3, 10) if numpy.count_nonzero(ideal == c) > 0
+            ]
+        elif len(clusters0K) != 7:
+            # print(clusters0K)
+            clusterCountNotID = numpy.zeros(
+                (data[T]["Class"].references.shape[0]), dtype=float
             )
-    legend_elements = []
-    for k in styles:
-        title = f"{k}\u2009K" if k != "Ideal" else "Ideal"
-        legend_elements.append(Patch(label=title, facecolor="#aaa", **styles[k]))
+            clusterCountID = numpy.zeros(
+                (data[T]["Class"].references.shape[0]), dtype=float
+            )
+            for c in range(3, 10):
+                if c in clusters0K:
+                    clusterCountID += numpy.count_nonzero(
+                        data[T]["Class"].references == c, axis=-1
+                    )
+                else:
+                    clusterCountNotID += numpy.count_nonzero(
+                        data[T]["Class"].references == c, axis=-1
+                    )
+            surfClusters = clusterCountID + clusterCountNotID
+            clusterCountID /= surfClusters
+            clusterCountNotID /= surfClusters
+            p[0] = numpy.mean(clusterCountID)
+            p += [numpy.mean(clusterCountNotID)]
+        axes[f"np{T}"].imshow(imread(f"{NP}_{T}-topDown.png"))
+        axes[f"np{T}"].set_title(f"{T}")
+        pieax = axes[f"np{T}"].inset_axes([0.7, -0.2, 0.3, 0.3])
+        axes[f"np{T}"].axis("off")
+        pieax.set_box_aspect(1)
+        pieax.pie(
+            p,
+            colors=["#e6e6e6", "#ed2fce"],
+            wedgeprops={"linewidth": 1, "ec": "k"},
+        )
+        if len(p) == 1:
+            p += [0]
 
-    ax.legend(handles=legend_elements)
+        pieax.annotate(
+            f"{int(p[1]*100)}%", (0, 0), (1, -1), color="#ed2fce", fontsize=15
+        )
 
 
 for NP in ["dh348_3_2_3", "to309_9_4"]:
     figsize = numpy.array([3.8, 3]) * 4
     # fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
     fig, axes = makeLayout6and7(figsize, dpi=300)
+    addNPImages(axes, data[NP], NP)
     for T in [300, 400, 500]:
-        AddTmatsAndChord5_6_7(
+        fsm.AddTmatsAndChord5_6_7(
             axes,
             data[NP][T],
             T,
@@ -181,9 +126,7 @@ for NP in ["dh348_3_2_3", "to309_9_4"]:
         )
 
     # todo: add the arrows
-    HistoMaker(axes["Histo"], data[NP], positions=[0, 1, 2, 9, 8, 3, 7, 5, 6, 4])
-
-# %%
+    fsm.HistoMaker(axes["Histo"], data[NP], positions=[0, 1, 2, 9, 8, 3, 7, 5, 6, 4])
 
 
 #%%

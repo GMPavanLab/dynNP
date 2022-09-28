@@ -132,15 +132,51 @@ for fname in ["ico309"]:
             print(hdnc.dist_membership_vector(data[isNoise]))
 """
 
-#%%
+#%% main NPs
 for fname in ["ico309", "dh348_3_2_3", "to309_9_4"]:
     print(f"Working on {fname}")
     t1_start = perf_counter()
-    with h5py.File(f"{fname}soap.hdf5", "r") as datafile, h5py.File(
-        f"{fname}classifications.hdf5", "w"  # this will overwrite!
-    ) as classFile:
+    with h5py.File(f"{fname}soap.hdf5", "r") as datafile:
         g = datafile["PCAs/ico309-SV_18631-SL_31922-T_300"]
-        gout = classFile.require_group("Classifications/ico309-SV_18631-SL_31922-T_300")
+        for k in g.keys():
+            myshape = g[k].shape
+
+            (lbl, strg), mem, lblNN = hdnc.predict(g[k][:, :, :3].reshape(-1, 3))
+            labelshape = (myshape[0], myshape[1])
+            memshape = (myshape[0], myshape[1], mem.shape[-1])
+            with h5py.File(f"{fname}classifications.hdf5", "a") as classFile:
+                gout = classFile.require_group(
+                    "Classifications/ico309-SV_18631-SL_31922-T_300"
+                )
+                resGroup = gout.require_group(k)
+                resGroup.require_dataset(
+                    "labels", shape=labelshape, dtype=int, data=lbl.reshape(labelshape)
+                )
+                resGroup.require_dataset(
+                    "labelsStrength",
+                    shape=labelshape,
+                    dtype=int,
+                    data=strg.reshape(labelshape),
+                )
+                resGroup.require_dataset(
+                    "labelsNN",
+                    shape=labelshape,
+                    dtype=int,
+                    data=lblNN.reshape(labelshape),
+                )
+                resGroup.require_dataset(
+                    "memberships", shape=memshape, dtype=int, data=mem.reshape(memshape)
+                )
+    t1_stop = perf_counter()
+    print(f"Time for {fname}: {t1_stop - t1_start} s")
+
+#%% minimized NPs
+for fname in ["ico309", "dh348_3_2_3", "to309_9_4"]:
+    print(f"Working on {fname}")
+    t1_start = perf_counter()
+    with h5py.File(f"../minimized.hdf5", "a") as datafile:
+        g = datafile["PCAs/ico309-SV_18631-SL_31922-T_300"]
+        gout = datafile.require_group("Classifications/ico309-SV_18631-SL_31922-T_300")
         for k in g.keys():
             myshape = g[k].shape
 
@@ -148,20 +184,22 @@ for fname in ["ico309", "dh348_3_2_3", "to309_9_4"]:
             labelshape = (myshape[0], myshape[1])
             memshape = (myshape[0], myshape[1], mem.shape[-1])
             resGroup = gout.require_group(k)
-            resGroup.create_dataset(
+            resGroup.require_dataset(
                 "labels", shape=labelshape, dtype=int, data=lbl.reshape(labelshape)
             )
-            resGroup.create_dataset(
+            resGroup.require_dataset(
                 "labelsStrength",
                 shape=labelshape,
                 dtype=int,
                 data=strg.reshape(labelshape),
             )
-            resGroup.create_dataset(
+            resGroup.require_dataset(
                 "labelsNN", shape=labelshape, dtype=int, data=lblNN.reshape(labelshape)
             )
-            resGroup.create_dataset(
+            resGroup.require_dataset(
                 "memberships", shape=memshape, dtype=int, data=mem.reshape(memshape)
             )
     t1_stop = perf_counter()
     print(f"Time for {fname}: {t1_stop - t1_start} s")
+
+# %%

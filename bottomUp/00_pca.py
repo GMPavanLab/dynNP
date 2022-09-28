@@ -1,5 +1,4 @@
 #%%
-from symbol import parameters
 import h5py
 from sklearn.decomposition import PCA
 import SOAPify
@@ -56,4 +55,7 @@ with h5py.File("ico309soap.hdf5", "r") as file:
     pcaMaker = preparePCAFitSet(file["SOAP/ico309-SV_18631-SL_31922-T_300"], 8)
 #%%
 for fname in ["dh348_3_2_3soap.hdf5", "ico309soap.hdf5", "to309_9_4soap.hdf5"]:
+    applypca(fname, pcaMaker, "ico309-SV_18631-SL_31922-T_300")
+#%%
+for fname in ["../minimized.hdf5"]:
     applypca(fname, pcaMaker, "ico309-SV_18631-SL_31922-T_300")

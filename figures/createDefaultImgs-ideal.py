@@ -2,16 +2,14 @@ from ovito.io import import_file
 from ovito.vis import OpenGLRenderer, Viewport
 from ovito.modifiers import ColorCodingModifier, SliceModifier
 
-ouputFname = "fittedOn_ico309-SV_18631-SL_31922-T_300-125-eom"
+ouputFname = "BottomUP"
 
 vp = Viewport()
-pipeline = import_file("ico309_ideal.xyz")
+pipeline = import_file("ico309_Ideal.xyz")
 pipeline.modifiers.append(
     ColorCodingModifier(
         property="predictionWithNoNoise",
-        gradient=ColorCodingModifier.Image(
-            "bottomUpCMAP.png"
-        ),
+        gradient=ColorCodingModifier.Image("bottomUpCMAP.png"),
     )
 )
 
