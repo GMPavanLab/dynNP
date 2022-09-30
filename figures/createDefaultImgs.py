@@ -89,13 +89,15 @@ trajectories = (
     ),
 )
 
-for classificationNAME in ["bottomUP", "topDown"]:
+for (classificationNAME, maxNum) in [("bottomUP", 7.0), ("topDown", 9.0)]:
 
     vp = Viewport()
     pipeline = import_file(f"{trajectories[0]['name']}lastUs@1ns.xyz")
     pipeline.modifiers.append(
         ColorCodingModifier(
             property=classificationNAME,
+            end_value=maxNum,
+            start_value=0.0,
             gradient=ColorCodingModifier.Image(f"{classificationNAME}CMAP.png"),
         )
     )

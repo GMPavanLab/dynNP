@@ -270,14 +270,16 @@ def makeLayout3(figsize, **figkwargs):
     NPAxes = mainGrid[:, 0].subgridspec(3, 1, height_ratios=[1, 0.1, 1])
     axes["NPTime"] = fig.add_subplot(NPAxes[0])
     axes["NPClasses"] = fig.add_subplot(NPAxes[-1])
-    axes["NPcmap"] = fig.add_subplot(NPAxes[1])
+    axes["NPcbar"] = fig.add_subplot(NPAxes[1])
     for g, n in [
         (mainGrid[0, 1], "followGraph"),
         (mainGrid[0, 2], "graphT300"),
         (mainGrid[1, 1], "graphT400"),
         (mainGrid[1, 2], "graphT500"),
     ]:
-        axes[n] = fig.add_subplot(g)
+        axes[n] = fig.add_subplot(
+            g  # , sharey=axes["followGraph"] if n != "followGraph" else None
+        )
     for i, ax in enumerate(
         [
             axes["NPTime"],
