@@ -2,3 +2,6 @@ NPenv/
 *.hdf5
 *.pyc
 *.out
+figures/*.png
+figures/*.xyz
+!figures/*CMAP.png
