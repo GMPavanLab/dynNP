@@ -63,4 +63,5 @@ def CreateLegend(
 
 if __name__ == "__main__":
     # CreateLegend("bottomUpCMAP.png", "bottomUp", 8)
-    CreateLegend("topDownCMAP.png", "topDown", 10)
+    # CreateLegend("topDownCMAP.png", "topDown", 10)
+    CreateLegend("topDownFullCMAP.png", "topDownFull", 47)

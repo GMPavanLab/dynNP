@@ -203,3 +203,24 @@ for fname in ["ico309", "dh348_3_2_3", "to309_9_4"]:
     print(f"Time for {fname}: {t1_stop - t1_start} s")
 
 # %%
+from matplotlib import pyplot as plt
+
+fig = plt.figure()
+ax = fig.add_subplot(projection="3d")
+
+bottomUpcolorMapHex = [
+    "#00b127",  # Faces
+    "#e00081",  # Concave
+    "#0086ba",  # 5foldedSS
+    "#003ac6",  # Ico
+    "#450055",  # Bulk
+    "#3800a8",  # SubSurf
+    "#bdff0e",  # Edges
+    "#ffe823",  # Vertexes
+]
+
+fs = hdnc.fitset
+ax.scatter(fs[:,0],fs[:,1],fs[:,2],c="gray",alpha=0.01,s=0.1)
+for cluster in hdnc.exemplars:
+    t = hdnc.exemplars[cluster]["points"]
+    ax.scatter(t[:,0],t[:,1],t[:,2],c=bottomUpcolorMapHex[cluster])

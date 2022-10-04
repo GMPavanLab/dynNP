@@ -3,8 +3,10 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from matplotlib.colors import to_rgb
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib.image import imread
 from mpl_toolkits.axisartist.axislines import AxesZero
-import h5py, re, numpy
+import h5py, re, numpy, sys, seaborn
 from string import ascii_lowercase as alph
 from chorddiagram import ChordDiagram
 
@@ -14,9 +16,13 @@ from SOAPify import (
     transitionMatrixFromSOAPClassification as tmatMakerNN,
     SOAPclassification,
 )
-import seaborn
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-from matplotlib.image import imread
+
+sys.path.insert(0, "../topDown")
+from referenceMaker import (
+    desiredReferenceOrderIco,
+    desiredReferenceOrderTo,
+    desiredReferenceOrderDh,
+)
 
 __reT = re.compile("T_([0-9]*)")
 
@@ -43,7 +49,7 @@ bottomUpcolorMapHex = [
     "#bdff0e",  # Edges
     "#ffe823",  # Vertexes
 ]
-bottomUpcolorMap = numpy.array([to_rgb(k) for k in bottomUpcolorMapHex])
+bottomUpColorMap = numpy.array([to_rgb(k) for k in bottomUpcolorMapHex])
 
 bottomUpLabels = [
     "Faces",  # 0
@@ -152,6 +158,21 @@ topDownClusters = numpy.array(
         0,
     ]
 )
+
+topDown_ihColorMap = list(
+    seaborn.color_palette("Blues", n_colors=len(desiredReferenceOrderIco))
+)[::-1]
+topDown_toColorMap = list(
+    seaborn.color_palette(
+        "Purples",
+        n_colors=len(desiredReferenceOrderTo),
+    )
+)[::-1]
+topDown_dhColorMap = list(
+    seaborn.color_palette("Greens", n_colors=len(desiredReferenceOrderDh))
+)[::-1]
+
+topDownFullColorMap = topDown_ihColorMap + topDown_toColorMap + topDown_dhColorMap
 
 
 def getF(proposed: float, concurrentArray, F):
@@ -580,7 +601,7 @@ def plotTemperatureData(axesdict, T, data, xlims, ylims, zoom=0.01):
         data["pca"][:, 0],
         data["pca"][:, 1],
         s=0.1,
-        c=bottomUpcolorMap[data["labelsNN"]],
+        c=bottomUpColorMap[data["labelsNN"]],
         alpha=0.5,
     )
     axesdict[f"pca{T}Ax"].contour(
@@ -668,4 +689,4 @@ def colorBarExporter(listOfColors, filename=None):
 
 
 # colorBarExporter(topDownColorMap[::-1], "topDownCMAP.png")
-# colorBarExporter(bottomUpcolorMap[::-1], "bottomUPCMAP.png")
+# colorBarExporter(bottomUpColorMap[::-1], "bottomUPCMAP.png")
