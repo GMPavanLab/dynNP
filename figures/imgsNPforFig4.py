@@ -4,31 +4,32 @@ from ovito.modifiers import *
 from ovito.data import *
 from ovito.pipeline import *
 from ovito.vis import *
-from ovito.qt_compat import QtCore,QtGui
+from ovito.qt_compat import QtCore, QtGui
 import numpy
 from numpy.linalg import norm
 
 # Parameters:
-bar_length = 10   # Simulation units (e.g. Angstroms)
-color_black = QtGui.QColor(0,0,0)
+bar_length = 10  # Simulation units (e.g. Angstroms)
+color_black = QtGui.QColor(0, 0, 0)
 label_text = f"{bar_length//10} nm"
-#label_color = QtGui.QColor(255,255,255)
+# label_color = QtGui.QColor(255,255,255)
+
 
 def addScale(args: PythonViewportOverlay.Arguments):
     if args.is_perspective:
         raise Exception("This overlay only works with non-perspective viewports.")
 
     # Compute length of bar in screen space
-    screen_length = args.project_size((0,0,0), bar_length)
+    screen_length = args.project_size((0, 0, 0), bar_length)
 
     # Define geometry of bar in screen space
     height = 0.07 * args.painter.window().height() / 2
     margin = 0.02 * args.painter.window().height()
-    left=args.painter.window().width() - screen_length -margin
-    top= args.painter.window().height() - height -margin
+    left = args.painter.window().width() - screen_length - margin
+    top = args.painter.window().height() - height - margin
     lenghtBar = QtCore.QRectF(left, top, screen_length, height)
-    fontHeight=2*height
-    textBar = QtCore.QRectF(left, top-fontHeight, screen_length, fontHeight)
+    fontHeight = 2 * height
+    textBar = QtCore.QRectF(left, top - fontHeight, screen_length, fontHeight)
 
     # Render bar rectangle
     args.painter.fillRect(lenghtBar, color_black)
@@ -39,7 +40,6 @@ def addScale(args: PythonViewportOverlay.Arguments):
     args.painter.setFont(font)
     args.painter.setPen(QtGui.QPen(color_black))
     args.painter.drawText(textBar, QtCore.Qt.AlignCenter, label_text)
-
 
 
 def prepareFig4(
@@ -53,7 +53,7 @@ def prepareFig4(
     camera_dir=(0.3822613161499919, -0.7753027203453063, -0.5027742813633606),
     fov=11.779909025058428,
     vpType=Viewport.Type.Ortho,
-    visFrame=0
+    visFrame=0,
 ):
     OutputName = f"{OutputName}"
     # Data import:
@@ -77,7 +77,6 @@ def prepareFig4(
 
     pipeline.add_to_scene()
 
-
     # Viewport setup:
     vp = Viewport(
         type=vpType,
@@ -100,61 +99,63 @@ def prepareFig4(
 
 
 if __name__ == "__main__":
-    prepareToPlot=dict(
-                to309_9_4= dict(
-    camera_pos=(11.52, 11.52, 0),
-    camera_dir=(0,0.836899,-0.547358),
-    fov=14.5764,
-    colorby="to",),
-        to976_12_4 = dict(
-    camera_pos=(0, 0, 0),
-    camera_dir=(0,0.867423,-0.497571),
-    fov=18.9585,
-    colorby="to",),
-    to807_11_3 = dict(
-    camera_pos=(0, 0, 0),
-    camera_dir=(0,0.867423,-0.497571),
-    fov=16.8147,
-    colorby="to",),
-        dh1086_7_1_3 = dict(
-    camera_pos=(0, 0, 0),
-    camera_dir=(-0.268601,0.735836,-0.62161),
-    fov=25.1348,
-    colorby="dh",),
-        dh1734_5_4_4 = dict(
-    camera_pos=(0, 0, 0),
-    camera_dir=(-0.268601,0.735836,-0.62161),
-    fov=22.2925,
-    colorby="dh",),
-    dh348_3_2_3 = dict(
-    camera_pos=(0, 0, 0),
-    camera_dir=(-0.268601,0.735836,-0.62161),
-    fov=13.7943,
-    colorby="dh",),
-    ico923_6 = dict(
-    camera_pos=(0, 0, 0),
-    camera_dir=(0,0.42738,0.904072),
-    fov=19.7717,
-    colorby="ih",),
-        ico309 = dict(
-    camera_pos=(0, 0, 0),
-    camera_dir=(0,0.42738,0.904072),
-    fov=13.7943,
-    colorby="ih",),
+    prepareToPlot = dict(
+        to309_9_4=dict(
+            camera_pos=(11.52, 11.52, 0),
+            camera_dir=(0, 0.836899, -0.547358),
+            fov=14.5764,
+            colorby="to",
+        ),
+        to976_12_4=dict(
+            camera_pos=(0, 0, 0),
+            camera_dir=(0, 0.867423, -0.497571),
+            fov=18.9585,
+            colorby="to",
+        ),
+        to807_11_3=dict(
+            camera_pos=(0, 0, 0),
+            camera_dir=(0, 0.867423, -0.497571),
+            fov=16.8147,
+            colorby="to",
+        ),
+        dh1086_7_1_3=dict(
+            camera_pos=(0, 0, 0),
+            camera_dir=(-0.268601, 0.735836, -0.62161),
+            fov=25.1348,
+            colorby="dh",
+        ),
+        dh1734_5_4_4=dict(
+            camera_pos=(0, 0, 0),
+            camera_dir=(-0.268601, 0.735836, -0.62161),
+            fov=22.2925,
+            colorby="dh",
+        ),
+        dh348_3_2_3=dict(
+            camera_pos=(0, 0, 0),
+            camera_dir=(-0.268601, 0.735836, -0.62161),
+            fov=13.7943,
+            colorby="dh",
+        ),
+        ico923_6=dict(
+            camera_pos=(0, 0, 0),
+            camera_dir=(0, 0.42738, 0.904072),
+            fov=19.7717,
+            colorby="ih",
+        ),
+        ico309=dict(
+            camera_pos=(0, 0, 0),
+            camera_dir=(0, 0.42738, 0.904072),
+            fov=13.7943,
+            colorby="ih",
+        ),
     )
     for exampleNP in prepareToPlot:
         prepareFig4(
-        xyzFile=f"{exampleNP}_topDown.xyz",
-        OutputName=f"{exampleNP}_topDown",
-        renderer=OpenGLRenderer(antialiasing_level=6),
-        **prepareToPlot[exampleNP],
-        vpType=Viewport.Type.Ortho,
-        
-        cmapImage="topDownFullCMAP.png",
-        
-        colorbyInterval=(0.0, 46.0),
-        
-    )
-
-
-
+            xyzFile=f"{exampleNP}_topDown.xyz",
+            OutputName=f"{exampleNP}_topDown",
+            renderer=OpenGLRenderer(antialiasing_level=6),
+            **prepareToPlot[exampleNP],
+            vpType=Viewport.Type.Ortho,
+            cmapImage="topDownFullCMAP.png",
+            colorbyInterval=(0.0, 46.0),
+        )

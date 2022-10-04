@@ -206,7 +206,9 @@ def getClustersFromReference(reference: SOAPReferences, **fclusterKwargs):
 
 def referenceDendroMaker(reference: SOAPReferences, **dendroKwargs) -> numpy.ndarray:
     wholeDistances = elaborateDistancesFronReferences(reference)
-    sch.dendrogram(sch.linkage(wholeDistances, method="complete"), **dendroKwargs)
+    return sch.dendrogram(
+        sch.linkage(wholeDistances, method="complete"), **dendroKwargs
+    )
 
 
 def getDefaultReferences(refFile="References.hdf5"):
