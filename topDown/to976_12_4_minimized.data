@@ -9,7 +9,7 @@ LAMMPS data file via write_data, version 29 Sep 2021, timestep = 21
 
 Masses
 
-1 196.96655
+1 196.96655 # Au
 
 Pair Coeffs # smatb/single
 
