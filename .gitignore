@@ -5,3 +5,4 @@ NPenv/
 figures/*.png
 figures/*.xyz
 !figures/*CMAP.png
+!figures/Scissors.png

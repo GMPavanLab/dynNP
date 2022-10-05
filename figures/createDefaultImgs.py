@@ -105,6 +105,7 @@ for (classificationNAME, maxNum) in [("bottomUP", 7.0), ("topDown", 9.0)]:
 
     renderer = OpenGLRenderer(antialiasing_level=6)
     for myData in trajectories:
+        print(classificationNAME, myData["name"])
         pipeline.source.load(f"{myData['name']}lastUs@1ns.xyz")
         data = pipeline.compute()
         data.cell.vis.enabled = False

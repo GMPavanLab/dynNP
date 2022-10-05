@@ -26,12 +26,17 @@ __titleDict = dict(
 )
 
 
-figsize = numpy.array([4, 3]) * 3
+figsize = numpy.array([5, 4]) * 3
 NPS = ["ico", "dh", "to"]
 refs = {k: getDefaultReferencesSubdict(k, "../topDown/References.hdf5") for k in NPS}
 refs["icodhto"] = getDefaultReferences("../topDown/References.hdf5")
-
+cut_at = 0.08
+bias = dict(dh=12 + 13, to=12, ico=0)
+zoom = 0.015
+zoomScissors = zoom * 2
+labelPad = 17
 #%%
+
 def makeLayout4(figsize, **figkwargs):
     fig = plt.figure(figsize=figsize, **figkwargs)
     mainGrid = fig.add_gridspec(4, 2, width_ratios=[1, 2.5], wspace=0.1)
@@ -95,15 +100,14 @@ def makeLayout4(figsize, **figkwargs):
 
 
 fig, axes = makeLayout4(figsize, dpi=300)
-print(axes.keys())
-bias = dict(dh=12 + 13, to=12, ico=0)
-zoom = 0.01
+
+
 for k in NPS:
     labels = [renamer[k]() for k in refs[k].names]
     dendro = referenceDendroMaker(
         refs[k], ax=axes[f"{k}Ax"], labels=labels, color_threshold=0
     )
-    axes[f"{k}Ax"].tick_params(axis="both", which="major", pad=12)
+    axes[f"{k}Ax"].tick_params(axis="both", which="major", pad=labelPad)
     for i, l in enumerate(dendro["leaves"]):
         l += bias[k]
         img = OffsetImage(imread(f"topDownFull{l:04}.png"), zoom=zoom)
@@ -121,18 +125,22 @@ for k in NPS:
     axes[f"{k}Ax"].set_yticks([])
     for spine in ["top", "right", "bottom", "left"]:
         axes[f"{k}Ax"].spines[spine].set_visible(False)
+
 k = "icodhto"
 labels = [renamer[k]() for k in refs[k].names]
 reorderedColors = [fsm.topDownColorMapHex[i] for i in [0, 1, 2, 4, 5, 3, 6, 7, 9, 8]]
 sch.set_link_color_palette(reorderedColors)
+
 dendro = referenceDendroMaker(
     refs[k],
     ax=axes[f"{k}Ax"],
     labels=labels,
-    color_threshold=0.08,
+    color_threshold=cut_at,
     above_threshold_color="#999",
 )
-axes[f"{k}Ax"].tick_params(axis="both", which="major", pad=15)
+
+axes[f"{k}Ax"].spines["bottom"].set_position("zero")
+axes[f"{k}Ax"].tick_params(axis="x", which="major", pad=labelPad, rotation=90)
 for i, l in enumerate(dendro["leaves"]):
     img = OffsetImage(imread(f"topDownFull{l:04}.png"), zoom=zoom)
     n = 0
@@ -146,6 +154,17 @@ for i, l in enumerate(dendro["leaves"]):
         # box_alignment=(0.5, 0.5),
     )
     axes[f"{k}Ax"].add_artist(ab)
+axes[f"{k}Ax"].hlines(cut_at, 0, 47 * 10, color="k", linestyles="--")
+axes[f"{k}Ax"].add_artist(
+    AnnotationBbox(
+        OffsetImage(imread(f"Scissors.png"), zoom=zoomScissors),
+        (47 * 10, cut_at),
+        # xybox=(i * 10 + 5, n + offset),
+        frameon=False,
+        xycoords="data",
+        # box_alignment=(0.5, 0.5),
+    )
+)
 
 topDownLabels = [
     ("b", 8),  # 0
@@ -160,20 +179,21 @@ topDownLabels = [
     ("v'", 3),  # 9
 ]
 pos = 0
+scaledict = {8: 1.75, 7: 1.65, 3: 1.55, 2: 1.35}
 for i, (label, width) in enumerate(topDownLabels):
     place = (pos + width / 2) * 10
     pos += width
     axes[f"{k}Ax"].annotate(
         label,
-        (place, -0.2),
-        (place, -0.2),
+        (place, -0.27),
+        (place, -0.4),
         xycoords="data",
         textcoords="data",
         # size="large", color="tab:blue",
         horizontalalignment="center",
         verticalalignment="center",
         arrowprops=dict(
-            arrowstyle=f"-[,widthB={width/2}, lengthB=0.2, angleB=0",  # ="-[",
+            arrowstyle=f"-[,widthB={scaledict[width]*width/2}, lengthB=1.5, angleB=0",  # ="-[",
             #    connectionstyle="arc3,rad=-0.05",
             color=reorderedColors[i],
             #    shrinkA=5,
@@ -182,7 +202,7 @@ for i, (label, width) in enumerate(topDownLabels):
         ),
         # bbox=dict(boxstyle="square", fc="w"),
     )
-
+axes[f"{k}Ax"].set_ylim(bottom=-0.27)
 
 for np in [
     "dh1086_7_1_3",
@@ -201,4 +221,5 @@ for spine in ["top", "right", "bottom", "left"]:
 
 axes[f"{k}Ax"].set_yticks([])
 
+fig.savefig(f"figure4.png", bbox_inches="tight", pad_inches=0,dpi=300)
 # %%

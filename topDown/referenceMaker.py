@@ -155,10 +155,10 @@ class Names:
 
 def nameFromLabel(s):
     id1 = s.index("_")
-    id2 = -1 if s.count("_") == 1 else s.index("_", id1 + 1)
+    id2 = None if s.count("_") == 1 else s.index("_", id1 + 1)
     cat = s[:id1]
     sub = s[id1 + 1 : id2]
-    sup = " " if id2 == -1 else s[id2 + 1 :]
+    sup = " " if id2 == None else s[id2 + 1 :]
     return Names(cat, sub, sup)
 
 

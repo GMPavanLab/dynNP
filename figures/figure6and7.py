@@ -103,7 +103,7 @@ for i, NP in enumerate(["dh348_3_2_3", "to309_9_4"], 6):
         barWidth=0.16,
         barSpace=0.05,
     )
-    fig.savefig(f"figure{i}.png", bbox_inches="tight", pad_inches=0)
+    fig.savefig(f"figure{i}.png", bbox_inches="tight", pad_inches=0, dpi=300)
 
 
 #%%

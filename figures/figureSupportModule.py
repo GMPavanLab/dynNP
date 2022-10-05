@@ -195,6 +195,7 @@ def dataLoaderBottomUp(filename):
     with h5py.File(filename, "r") as f:
         pcas = f["/PCAs/ico309-SV_18631-SL_31922-T_300"]
         for k in pcas:
+            dataContainer["nat"] = f[f"/SOAP/{k}"].shape[1]
             T = getT(k)
             dataContainer[T] = dict(pca=pcas[k][:, :, :2].reshape(-1, 2))
             dataContainer["xlims"][0] = getMin(
@@ -229,7 +230,7 @@ def dataLoaderTopDown(classificationFile: str, data: dict, NPname: str):
 #%% Layouts
 
 __titleDict = dict(
-    fontdict=dict(weight="bold"),
+    fontdict=dict(weight="bold", horizontalalignment="right"),
     loc="left",
 )
 
