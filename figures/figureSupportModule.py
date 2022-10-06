@@ -235,8 +235,8 @@ __titleDict = dict(
 )
 
 
-def makeLayout1(figsize, **figkwargs):
-    fig = plt.figure(figsize=figsize, **figkwargs)
+def makeLayout1(labelsOptions=dict(), **figkwargs):
+    fig = plt.figure(**figkwargs)
     mainGrid = fig.add_gridspec(2, 4)
 
     axes = dict(
@@ -246,6 +246,9 @@ def makeLayout1(figsize, **figkwargs):
         legendAx=fig.add_subplot(mainGrid[0, 3]),
     )
     axes.update(createSimulationFigs(mainGrid[1, :].subgridspec(1, 4), fig, name="300"))
+
+    titleDict = __titleDict.copy()
+    titleDict["fontdict"].update(labelsOptions)
     for i, ax in enumerate(
         [
             axes["soapAx"],
@@ -258,17 +261,19 @@ def makeLayout1(figsize, **figkwargs):
             axes["tmat300Ax"],
         ]
     ):
-        ax.set_title(alph[i], **__titleDict)
+        ax.set_title(alph[i], **titleDict)
     return fig, axes
 
 
-def makeLayout2(figsize, **figkwargs):
-    fig = plt.figure(figsize=figsize, **figkwargs)
+def makeLayout2(labelsOptions=dict(), **figkwargs):
+    fig = plt.figure(**figkwargs)
     mainGrid = fig.add_gridspec(2, 4)
 
     axes = dict()
     axes.update(createSimulationFigs(mainGrid[0, :].subgridspec(1, 4), fig, name="400"))
     axes.update(createSimulationFigs(mainGrid[1, :].subgridspec(1, 4), fig, name="500"))
+    titleDict = __titleDict.copy()
+    titleDict["fontdict"].update(labelsOptions)
     for i, ax in enumerate(
         [
             axes["img400Ax"],
@@ -281,13 +286,13 @@ def makeLayout2(figsize, **figkwargs):
             axes["tmat500Ax"],
         ]
     ):
-        ax.set_title(alph[i], **__titleDict)
+        ax.set_title(alph[i], **titleDict)
     return fig, axes
 
 
-def makeLayout3(figsize, **figkwargs):
+def makeLayout3(labelsOptions=dict(), **figkwargs):
     axes = dict()
-    fig = plt.figure(figsize=figsize, **figkwargs)
+    fig = plt.figure(**figkwargs)
     mainGrid = fig.add_gridspec(nrows=2, ncols=3, width_ratios=[1, 1, 1])
     NPAxes = mainGrid[:, 0].subgridspec(3, 1, height_ratios=[1, 0.1, 1])
     axes["NPTime"] = fig.add_subplot(NPAxes[0])
@@ -302,6 +307,8 @@ def makeLayout3(figsize, **figkwargs):
         axes[n] = fig.add_subplot(
             g  # , sharey=axes["followGraph"] if n != "followGraph" else None
         )
+    titleDict = __titleDict.copy()
+    titleDict["fontdict"].update(labelsOptions)
     for i, ax in enumerate(
         [
             axes["NPTime"],
@@ -312,13 +319,13 @@ def makeLayout3(figsize, **figkwargs):
             axes["graphT500"],
         ]
     ):
-        ax.set_title(alph[i], **__titleDict)
+        ax.set_title(alph[i], **titleDict)
     return fig, axes
 
 
-def makeLayout5(figsize, **figkwargs):
+def makeLayout5(labelsOptions=dict(), **figkwargs):
     axes = dict()
-    fig = plt.figure(figsize=figsize, **figkwargs)
+    fig = plt.figure(**figkwargs)
     mainGrid = fig.add_gridspec(
         nrows=4,
         ncols=4,
@@ -327,24 +334,27 @@ def makeLayout5(figsize, **figkwargs):
         hspace=0.3,
         wspace=0.3,
     )
-    legendGrid = mainGrid[0, :].subgridspec(1, 2)
+    legendGrid = mainGrid[0, :].subgridspec(1, 2, wspace=0.0)
     axes["dendro"] = fig.add_subplot(legendGrid[0])
     axes["legend"] = fig.add_subplot(legendGrid[1])
     npGrid = mainGrid[1:, 0].subgridspec(4, 1)
-    tmatGrid = mainGrid[3, 1:].subgridspec(1, 3)
+    # tmatGrid = mainGrid[3, 1:].subgridspec(1, 3)
+    tmatGrid = mainGrid[3, 1:].subgridspec(1, 5, width_ratios=[1, 1, 1, 0.05, 0.05])
     chordGrid = mainGrid[2, 1:].subgridspec(1, 3)
     axes[f"npIdeal"] = fig.add_subplot(npGrid[0])
     for i, T in enumerate([300, 400, 500]):
         axes[f"np{T}"] = fig.add_subplot(npGrid[i + 1])
         axes[f"tmat{T}"] = fig.add_subplot(tmatGrid[i])
         axes[f"chord{T}"] = fig.add_subplot(chordGrid[i])
-
+    axes[f"tmatCMAP"] = fig.add_subplot(tmatGrid[3])
     axes["Histo"] = fig.add_subplot(mainGrid[1, 1:])
     taxes = dict(
         nps=fig.add_subplot(mainGrid[1:, 0]),
         chords=fig.add_subplot(mainGrid[2, 1:]),
         tmats=fig.add_subplot(mainGrid[3, 1:]),
     )
+    titleDict = __titleDict.copy()
+    titleDict["fontdict"].update(labelsOptions)
     for i, ax in enumerate(
         [
             axes["dendro"],
@@ -354,16 +364,16 @@ def makeLayout5(figsize, **figkwargs):
             taxes["tmats"],
         ]
     ):
-        ax.set_title(alph[i], **__titleDict)
+        ax.set_title(alph[i], **titleDict)
     for ax in taxes:
         taxes[ax].axis("off")
 
     return fig, axes
 
 
-def makeLayout6and7(figsize, **figkwargs):
+def makeLayout6and7(labelsOptions=dict(), **figkwargs):
     axes = dict()
-    fig = plt.figure(figsize=figsize, **figkwargs)
+    fig = plt.figure(**figkwargs)
     mainGrid = fig.add_gridspec(
         nrows=3,
         ncols=2,
@@ -384,6 +394,8 @@ def makeLayout6and7(figsize, **figkwargs):
     axes[f"tmats"] = fig.add_subplot(tmatGrid[:])
     axes[f"chords"] = fig.add_subplot(chordGrid[:])
     axes["Histo"] = fig.add_subplot(mainGrid[1, 0])
+    titleDict = __titleDict.copy()
+    titleDict["fontdict"].update(labelsOptions)
     for i, ax in enumerate(
         [
             axes["nps"],
@@ -392,7 +404,7 @@ def makeLayout6and7(figsize, **figkwargs):
             axes["chords"],
         ]
     ):
-        ax.set_title(alph[i], **__titleDict)
+        ax.set_title(alph[i], **titleDict)
     for ax in [axes["nps"], axes["tmats"], axes["chords"]]:
         ax.axis("off")
     return fig, axes

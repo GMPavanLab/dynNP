@@ -83,8 +83,7 @@ def addNPImages(axes, data, NP):
 if __name__ == "__main__":
     for i, NP in enumerate(["dh348_3_2_3", "to309_9_4"], 6):
         figsize = numpy.array([3.8, 3]) * 4
-        # fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
-        fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
+        fig, axes = fsm.makeLayout6and7(figsize=figsize, dpi=300)
         addNPImages(axes, data[NP], NP)
         for T in [300, 400, 500]:
             fsm.AddTmatsAndChord5_6_7(
@@ -92,8 +91,16 @@ if __name__ == "__main__":
                 data[NP][T],
                 T,
                 cbarAx=None if T != 500 else axes["tmatCMAP"],
-                linewidth=0.1,
-                cbar_kws={} if T != 500 else {"label": "Probability"},
+                tmatOptions=dict(
+                    linewidth=1,
+                    cbar_kws={} if T != 500 else {"label": "Probability"},
+                ),
+                chordOptions=dict(
+                    visualizationScale=0.85,
+                    labels=fsm.topDownLabels,
+                    labelpos=1.2,
+                    # labelskwargs = dict(),
+                ),
             )
 
         fsm.HistoMaker(

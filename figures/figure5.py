@@ -38,7 +38,7 @@ for NP in data:
 figsize = numpy.array([5, 4]) * 3
 zoom = 0.01
 
-fig, axes = fsm.makeLayout5(figsize, dpi=300)
+fig, axes = fsm.makeLayout5(labelsOptions=dict(fontsize=15), figsize=figsize, dpi=300)
 # ['dendro', 'legend', 'npIdeal', 'np300', 'tmat300', 'chord300',
 #  'np400', 'tmat400', 'chord400', 'np500', 'tmat500', 'chord500', 'Histo']
 ##%%
@@ -52,15 +52,18 @@ fsm.HistoMaker(
     barSpace=0.05,
 )
 for T in [300, 400, 500]:
+    axes[f"tmat{T}"].tick_params(axis="both", which="major", pad=15)
+    axes[f"tmat{T}"].xaxis.set_ticks_position("none")
     fsm.AddTmatsAndChord5_6_7(
         axes,
         data[NP][T],
         T,
         zoom=zoom,
-        cbarAx=None,  # $ if T != 500 else axes["tmatCMAP"],
+        cbarAx=None if T != 500 else axes["tmatCMAP"],
         tmatOptions=dict(
-            linewidth=0.1,
+            linewidth=1,
             cbar_kws={} if T != 500 else {"label": "Probability"},
+            xticklabels=fsm.topDownLabels,
         ),
         chordOptions=dict(
             visualizationScale=0.85,
@@ -107,11 +110,12 @@ for i, l in enumerate(fsm.topDownLabels):
     )
     axes[f"legend"].annotate(l, (i, 0.1), ha="center")
     axes[f"legend"].add_artist(ab)
-axes[f"legend"].set_xlim(-0.5, 10.5)
+axes[f"legend"].set_xlim(-0.5, 9.5)
 axes[f"legend"].set_ylim(-0.5, 0.5)
 axes[f"legend"].axis("off")
-pos = -0.5
+pos = 0
 scaledict = {1: 1.35, 2: 2.5, 3: 3}
+scaledictH = {1: 1.35, 2: 2.8, 3: 3.5}
 for label, width in [
     ("bulk", 1),
     ("subSurf", 2),
@@ -123,8 +127,8 @@ for label, width in [
     pos += width
     axes[f"legend"].annotate(
         label,
-        (place, -0.1),
-        (place, -0.4),
+        (place - 0.5, -0.1),
+        (place - 0.5, -0.4),
         xycoords="data",
         textcoords="data",
         # size="large", color="tab:blue",
@@ -140,5 +144,18 @@ for label, width in [
         ),
         # bbox=dict(boxstyle="square", fc="w"),
     )
+    # axes['tmat300'].annotate(
+    #     label,
+    #     (0,place),
+    #     (-2,place),
+    #     xycoords="data",
+    #     textcoords="data",
+    #     horizontalalignment="right",
+    #     verticalalignment="center",
+    #     arrowprops=dict(
+    #         arrowstyle=f"-[,widthB={scaledictH[width]*width/2}, lengthB=1.0, angleB=0",  # ="-[",
+    #     ),
+    # )
 
 # %%
+fig.savefig("figure5.png", bbox_inches="tight", pad_inches=0, dpi=300)
