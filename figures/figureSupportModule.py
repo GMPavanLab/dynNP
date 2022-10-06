@@ -320,31 +320,44 @@ def makeLayout5(figsize, **figkwargs):
     axes = dict()
     fig = plt.figure(figsize=figsize, **figkwargs)
     mainGrid = fig.add_gridspec(
-        nrows=4, ncols=2, width_ratios=[1, 3], height_ratios=[1, 2, 2, 2]
+        nrows=4,
+        ncols=4,
+        width_ratios=[0.8, 1, 1, 1],
+        height_ratios=[1, 2, 2, 2],
+        hspace=0.3,
+        wspace=0.3,
     )
     legendGrid = mainGrid[0, :].subgridspec(1, 2)
     axes["dendro"] = fig.add_subplot(legendGrid[0])
     axes["legend"] = fig.add_subplot(legendGrid[1])
     npGrid = mainGrid[1:, 0].subgridspec(4, 1)
-    tmatGrid = mainGrid[3, 1].subgridspec(1, 3)
-    chordGrid = mainGrid[2, 1].subgridspec(1, 3)
+    tmatGrid = mainGrid[3, 1:].subgridspec(1, 3)
+    chordGrid = mainGrid[2, 1:].subgridspec(1, 3)
     axes[f"npIdeal"] = fig.add_subplot(npGrid[0])
     for i, T in enumerate([300, 400, 500]):
         axes[f"np{T}"] = fig.add_subplot(npGrid[i + 1])
         axes[f"tmat{T}"] = fig.add_subplot(tmatGrid[i])
         axes[f"chord{T}"] = fig.add_subplot(chordGrid[i])
 
-    axes["Histo"] = fig.add_subplot(mainGrid[1, 1])
+    axes["Histo"] = fig.add_subplot(mainGrid[1, 1:])
+    taxes = dict(
+        nps=fig.add_subplot(mainGrid[1:, 0]),
+        chords=fig.add_subplot(mainGrid[2, 1:]),
+        tmats=fig.add_subplot(mainGrid[3, 1:]),
+    )
     for i, ax in enumerate(
         [
             axes["dendro"],
-            axes["npIdeal"],
+            taxes["nps"],
             axes["Histo"],
-            axes["chord300"],
-            axes["tmat300"],
+            taxes["chords"],
+            taxes["tmats"],
         ]
     ):
         ax.set_title(alph[i], **__titleDict)
+    for ax in taxes:
+        taxes[ax].axis("off")
+
     return fig, axes
 
 
@@ -489,11 +502,12 @@ def addTmatNNTD(tempData):
     tempData["tmatNN"] = tmatMakerNN(tempData["Class"])
 
 
-def AddTmatsAndChord5_6_7(axesdict, data, T, zoom=0.01, cbarAx=None, **tmatOptions):
+def AddTmatsAndChord5_6_7(
+    axesdict, data, T, zoom=0.01, cbarAx=None, tmatOptions=dict(), chordOptions=dict()
+):
     reorder = list(range(10))  # [0, 1, 2, 5, 3, 4, 6, 7, 9, 8]
     mask = data["tmat"] == 0
-    seaborn.heatmap(
-        data["tmat"],
+    tmatOpts = dict(
         ax=axesdict[f"tmat{T}"],
         fmt="s",
         annot=None,
@@ -506,11 +520,23 @@ def AddTmatsAndChord5_6_7(axesdict, data, T, zoom=0.01, cbarAx=None, **tmatOptio
         cbar_ax=cbarAx,
         xticklabels=False,
         yticklabels=False,
-        **tmatOptions,
+    )
+    tmatOpts.update(tmatOptions)
+    seaborn.heatmap(
+        data["tmat"],
+        **tmatOpts,
     )
     decorateTmatWithLegend("topDown", reorder, axesdict[f"tmat{T}"], zoom=zoom)
+    chordOpts = dict(
+        colors=topDownColorMap,
+        ax=axesdict[f"chord{T}"],
+        onlyFlux=True,
+    )
+    chordOpts.update(chordOptions)
+
     ChordDiagram(
-        data["tmatNN"], colors=topDownColorMap, ax=axesdict[f"chord{T}"], onlyFlux=True
+        data["tmatNN"],
+        **chordOpts,
     )
     for ax in [axesdict[f"chord{T}"], axesdict[f"tmat{T}"]]:
         ax.set_title(f"{T}\u2009K")

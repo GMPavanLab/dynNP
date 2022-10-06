@@ -6,9 +6,9 @@ trajectories = (
     dict(
         name="ico309_Ideal",
         frame=0,
-        camera_pos=(-4.6932, 0, 0),
-        camera_dir=(-1, 0, 0),
-        fov=11.5908,
+        camera_pos=(0, 0, 0),
+        camera_dir=(0, 0.45, -1),
+        fov=12.4022,
     ),
     dict(
         name="ico309_300",

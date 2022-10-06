@@ -37,8 +37,11 @@ for NP in data:
 #%%
 figsize = numpy.array([5, 4]) * 3
 zoom = 0.01
+
 fig, axes = fsm.makeLayout5(figsize, dpi=300)
-# ['dendro', 'legend', 'npIdeal', 'np300', 'tmat300', 'chord300', 'np400', 'tmat400', 'chord400', 'np500', 'tmat500', 'chord500', 'Histo']
+# ['dendro', 'legend', 'npIdeal', 'np300', 'tmat300', 'chord300',
+#  'np400', 'tmat400', 'chord400', 'np500', 'tmat500', 'chord500', 'Histo']
+##%%
 NP = "ico309"
 addNPImages(axes, data[NP], NP)
 fsm.HistoMaker(
@@ -55,8 +58,16 @@ for T in [300, 400, 500]:
         T,
         zoom=zoom,
         cbarAx=None,  # $ if T != 500 else axes["tmatCMAP"],
-        linewidth=0.1,
-        cbar_kws={} if T != 500 else {"label": "Probability"},
+        tmatOptions=dict(
+            linewidth=0.1,
+            cbar_kws={} if T != 500 else {"label": "Probability"},
+        ),
+        chordOptions=dict(
+            visualizationScale=0.85,
+            labels=fsm.topDownLabels,
+            labelpos=1.2,
+            # labelskwargs = dict(),
+        ),
     )
 dendro = referenceDendroMaker(
     refs,
@@ -68,14 +79,14 @@ dendro = referenceDendroMaker(
 )
 axes[f"dendro"].set_xticks(axes[f"dendro"].get_xticks(), fsm.topDownLabelFound)
 axes[f"dendro"].set_yticks([])
-axes[f"dendro"].set_ylim(bottom=-0.1)
+axes[f"dendro"].set_ylim(bottom=-0.05)
 for spine in ["top", "right", "bottom", "left"]:
     axes[f"dendro"].spines[spine].set_visible(False)
-
+n = 0
+offset = -0.05
 for i, l in enumerate(fsm.topDownLabels):
     img = OffsetImage(imread(f"topDown{i:04}.png"), zoom=zoom)
-    n = 0
-    offset = -0.05
+
     pos = fsm.topDownLabelFound.index(l)
     ab = AnnotationBbox(
         img,
@@ -99,3 +110,35 @@ for i, l in enumerate(fsm.topDownLabels):
 axes[f"legend"].set_xlim(-0.5, 10.5)
 axes[f"legend"].set_ylim(-0.5, 0.5)
 axes[f"legend"].axis("off")
+pos = -0.5
+scaledict = {1: 1.35, 2: 2.5, 3: 3}
+for label, width in [
+    ("bulk", 1),
+    ("subSurf", 2),
+    ("concave", 2),
+    ("surface", 3),
+    ("vertex", 2),
+]:
+    place = pos + width / 2
+    pos += width
+    axes[f"legend"].annotate(
+        label,
+        (place, -0.1),
+        (place, -0.4),
+        xycoords="data",
+        textcoords="data",
+        # size="large", color="tab:blue",
+        horizontalalignment="center",
+        verticalalignment="center",
+        arrowprops=dict(
+            arrowstyle=f"-[,widthB={scaledict[width]*width/2}, lengthB=1.0, angleB=0",  # ="-[",
+            #    connectionstyle="arc3,rad=-0.05",
+            # color=reorderedColors[i],
+            #    shrinkA=5,
+            #    shrinkB=5,
+            #    patchB=l,
+        ),
+        # bbox=dict(boxstyle="square", fc="w"),
+    )
+
+# %%
