@@ -9,6 +9,7 @@ from mpl_toolkits.axisartist.axislines import AxesZero
 import h5py, re, numpy, sys, seaborn
 from string import ascii_lowercase as alph
 from chorddiagram import ChordDiagram
+from scipy.ndimage import gaussian_filter
 
 # import colorsys
 from SOAPify import (
@@ -60,6 +61,16 @@ bottomUpLabels = [
     "SubSurf",  # 5
     "Edges",  # 6
     "Vertexes",  # 7
+]
+bottomUpLabels_ordered = [
+    "Ico",
+    "Bulk",
+    "SubSurf",
+    "5foldedSS",
+    "Concave",
+    "Faces",
+    "Edges",
+    "Vertexes",
 ]
 bottomReordering = [7, 6, 0, 1, 2, 5, 4, 3]
 bottomReordering_r = bottomReordering[::-1]
@@ -261,7 +272,7 @@ def makeLayout1(labelsOptions=dict(), **figkwargs):
             axes["tmat300Ax"],
         ]
     ):
-        ax.set_title(alph[i], **titleDict)
+        ax.set_title(alph[i] + ("  " if i in [5, 6] else ""), **titleDict)
     return fig, axes
 
 
@@ -286,40 +297,57 @@ def makeLayout2(labelsOptions=dict(), **figkwargs):
             axes["tmat500Ax"],
         ]
     ):
-        ax.set_title(alph[i], **titleDict)
+        ax.set_title(alph[i] + ("  " if i in [1, 2, 5, 6] else ""), **titleDict)
     return fig, axes
 
 
 def makeLayout3(labelsOptions=dict(), **figkwargs):
     axes = dict()
     fig = plt.figure(**figkwargs)
-    mainGrid = fig.add_gridspec(nrows=2, ncols=3, width_ratios=[1, 1, 1])
-    NPAxes = mainGrid[:, 0].subgridspec(3, 1, height_ratios=[1, 0.1, 1])
-    axes["NPTime"] = fig.add_subplot(NPAxes[0])
-    axes["NPClasses"] = fig.add_subplot(NPAxes[-1])
-    axes["NPcbar"] = fig.add_subplot(NPAxes[1])
+    mainGrid = fig.add_gridspec(nrows=2, ncols=4, width_ratios=[0.6, 0.1, 1, 1])
+    NPGrid = mainGrid[:, 0].subgridspec(2, 1, height_ratios=[1, 1])
+    graphSUPGrid = mainGrid[0, 2:].subgridspec(2, 2, height_ratios=[1, 0.1])
+    graphINFGrid = mainGrid[1, 2:].subgridspec(2, 2, height_ratios=[1, 0.1])
+    taxes = dict(
+        npt=fig.add_subplot(mainGrid[0, 0]),
+        npc=fig.add_subplot(mainGrid[1, 0]),
+    )
+    axes["NPTime"] = fig.add_subplot(NPGrid[0])
+    axes["NPClasses"] = fig.add_subplot(NPGrid[-1])
+    axes["NPcbar"] = axes["NPTime"].inset_axes([0.1, -0.05, 0.8, 0.05])
+    # fig.add_subplot(mainGrid[:, 1])
     for g, n in [
-        (mainGrid[0, 1], "followGraph"),
-        (mainGrid[0, 2], "graphT300"),
-        (mainGrid[1, 1], "graphT400"),
-        (mainGrid[1, 2], "graphT500"),
+        (graphSUPGrid[0, 0], "followGraph"),
+        (graphSUPGrid[0, 1], "graphT300"),
+        (graphINFGrid[0, 0], "graphT400"),
+        (graphINFGrid[0, 1], "graphT500"),
     ]:
         axes[n] = fig.add_subplot(
             g  # , sharey=axes["followGraph"] if n != "followGraph" else None
         )
     titleDict = __titleDict.copy()
     titleDict["fontdict"].update(labelsOptions)
+    spacer = {
+        0: "",
+        1: "",
+        3: " " * 4,
+        5: " " * 4,
+        4: " " * 17,
+        2: " " * 17,
+    }
     for i, ax in enumerate(
         [
-            axes["NPTime"],
-            axes["NPClasses"],
+            taxes["npt"],
+            taxes["npc"],
             axes["followGraph"],
             axes["graphT300"],
             axes["graphT400"],
             axes["graphT500"],
         ]
     ):
-        ax.set_title(alph[i], **titleDict)
+        ax.set_title(alph[i] + spacer[i], **titleDict)
+    for ax in taxes:
+        taxes[ax].axis("off")
     return fig, axes
 
 
@@ -436,7 +464,7 @@ def addPseudoFes(tempData, bins=300, rangeHisto=None):
 
 def createSimulationFigs(grid, fig, name=""):
     toret = dict()
-    pcaFESGrid = grid[1:3].subgridspec(1, 3, width_ratios=[1, 1, 0.1])
+    pcaFESGrid = grid[1:3].subgridspec(1, 4, width_ratios=[1, 1, 0.1, 0.1])
     toret[f"img{name}Ax"] = fig.add_subplot(grid[0])
     toret[f"pca{name}Ax"] = fig.add_subplot(pcaFESGrid[0], axes_class=AxesZero)
     toret[f"pFES{name}Ax"] = fig.add_subplot(pcaFESGrid[1], axes_class=AxesZero)
@@ -627,7 +655,18 @@ def HistoMaker(
 
 
 #%%
-def plotTemperatureData(axesdict, T, data, xlims, ylims, zoom=0.01):
+pFEScmap = plt.cm.coolwarm_r.copy()
+pFEScmap.set_over("w")
+
+
+def plotTemperatureData(axesdict, T, data, xlims, ylims, zoom=0.01, smooth=0.0):
+    pFES = data["pFES"]
+    mymax = int(numpy.max(pFES[numpy.isfinite(pFES)]))
+    if smooth > 0.0:
+        t = numpy.array(pFES)
+        t[numpy.isinf(t)] = numpy.max(t[numpy.isfinite(t)])
+        pFES = gaussian_filter(t, sigma=smooth, order=0)
+
     # option for the countour lines
     countourOptions = dict(
         levels=10,
@@ -646,7 +685,7 @@ def plotTemperatureData(axesdict, T, data, xlims, ylims, zoom=0.01):
     axesdict[f"pca{T}Ax"].contour(
         data["pFESLimitsX"],
         data["pFESLimitsY"],
-        data["pFES"],
+        pFES,
         **countourOptions,
     )
 
@@ -654,16 +693,18 @@ def plotTemperatureData(axesdict, T, data, xlims, ylims, zoom=0.01):
     pfesPlot = axesdict[f"pFES{T}Ax"].contourf(
         data["pFESLimitsX"],
         data["pFESLimitsY"],
-        data["pFES"],
+        pFES,
         levels=10,
-        cmap="coolwarm_r",
+        cmap=pFEScmap,
         zorder=1,
+        extend="max",
+        vmax=mymax,
     )
 
     axesdict[f"pFES{T}Ax"].contour(
         data["pFESLimitsX"],
         data["pFESLimitsY"],
-        data["pFES"],
+        pFES,
         **countourOptions,
     )
 
@@ -673,6 +714,7 @@ def plotTemperatureData(axesdict, T, data, xlims, ylims, zoom=0.01):
         aspect=10,
         orientation="vertical",
         cax=axesdict[f"cbarFes{T}Ax"],
+        label="$[k_BT]$",  # "_{\!_{" + self.sub + "}}"
     )
     mask = data["tmat"] == 0
     annots = getCompactedAnnotationsForTmat_percent(data["tmat"])

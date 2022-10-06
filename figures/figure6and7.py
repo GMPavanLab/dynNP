@@ -83,7 +83,9 @@ def addNPImages(axes, data, NP):
 if __name__ == "__main__":
     for i, NP in enumerate(["dh348_3_2_3", "to309_9_4"], 6):
         figsize = numpy.array([3.8, 3]) * 4
-        fig, axes = fsm.makeLayout6and7(figsize=figsize, dpi=300)
+        fig, axes = fsm.makeLayout6and7(
+            labelsOptions=dict(fontsize=15), figsize=figsize, dpi=300
+        )
         addNPImages(axes, data[NP], NP)
         for T in [300, 400, 500]:
             fsm.AddTmatsAndChord5_6_7(

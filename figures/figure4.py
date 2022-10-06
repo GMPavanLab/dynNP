@@ -37,6 +37,7 @@ zoomScissors = zoom * 2
 labelPad = 17
 #%%
 
+
 def makeLayout4(figsize, **figkwargs):
     fig = plt.figure(figsize=figsize, **figkwargs)
     mainGrid = fig.add_gridspec(4, 2, width_ratios=[1, 2.5], wspace=0.1)
@@ -220,6 +221,6 @@ for spine in ["top", "right", "bottom", "left"]:
     axes[f"{k}Ax"].spines[spine].set_visible(False)
 
 axes[f"{k}Ax"].set_yticks([])
-
-fig.savefig(f"figure4.png", bbox_inches="tight", pad_inches=0,dpi=300)
+#%%
+fig.savefig(f"figure4.png", bbox_inches="tight", pad_inches=0, dpi=300)
 # %%
