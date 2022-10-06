@@ -80,30 +80,30 @@ def addNPImages(axes, data, NP):
         )
 
 
-for i, NP in enumerate(["dh348_3_2_3", "to309_9_4"], 6):
-    figsize = numpy.array([3.8, 3]) * 4
-    # fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
-    fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
-    addNPImages(axes, data[NP], NP)
-    for T in [300, 400, 500]:
-        fsm.AddTmatsAndChord5_6_7(
-            axes,
-            data[NP][T],
-            T,
-            cbarAx=None if T != 500 else axes["tmatCMAP"],
-            linewidth=0.1,
-            cbar_kws={} if T != 500 else {"label": "Probability"},
-        )
+if __name__ == "__main__":
+    for i, NP in enumerate(["dh348_3_2_3", "to309_9_4"], 6):
+        figsize = numpy.array([3.8, 3]) * 4
+        # fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
+        fig, axes = fsm.makeLayout6and7(figsize, dpi=300)
+        addNPImages(axes, data[NP], NP)
+        for T in [300, 400, 500]:
+            fsm.AddTmatsAndChord5_6_7(
+                axes,
+                data[NP][T],
+                T,
+                cbarAx=None if T != 500 else axes["tmatCMAP"],
+                linewidth=0.1,
+                cbar_kws={} if T != 500 else {"label": "Probability"},
+            )
 
-    # todo: add the arrows
-    fsm.HistoMaker(
-        axes["Histo"],
-        data[NP],
-        positions=[0, 1, 2, 9, 8, 3, 7, 5, 6, 4],
-        barWidth=0.16,
-        barSpace=0.05,
-    )
-    fig.savefig(f"figure{i}.png", bbox_inches="tight", pad_inches=0, dpi=300)
+        fsm.HistoMaker(
+            axes["Histo"],
+            data[NP],
+            positions=[0, 1, 2, 9, 8, 3, 7, 5, 6, 4],
+            barWidth=0.16,
+            barSpace=0.05,
+        )
+        fig.savefig(f"figure{i}.png", bbox_inches="tight", pad_inches=0, dpi=300)
 
 
 #%%
