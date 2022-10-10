@@ -1,6 +1,6 @@
 #%%
 from h5py import File
-from HDF5er import MDA2HDF5
+from HDF5er import MDA2HDF5, getXYZfromTrajGroup
 import numpy
 from MDAnalysis import Universe as mdaUniverse
 from SOAPify import (
@@ -272,13 +272,33 @@ def getDefaultReferencesSubdict(NPtype: str, refFile="References.hdf5"):
 if __name__ == "__main__":
     references = dict()
 
-    with File("referenceFrames.hdf5", "r") as workFile:
+    with File("referenceFrames.hdf5", "r") as workFile, open(
+        "refFile.xyz", "w"
+    ) as refExport:
         for k in FramesRequest:
             references[k] = createReferencesFromTrajectory(
                 workFile[f"SOAP/{k}"], FramesRequest[k], 8, 8
             )
+            trj = workFile[f"Trajectories/{k}"]
+            nat = trj["Types"].shape[0]
+            for request in FramesRequest[k]:
+                Selection = numpy.zeros((1, nat), dtype=int)
+                Selection[0, FramesRequest[k][request][1]] = 1
+                pos = trj["Trajectory"][
+                    FramesRequest[k][request][0], FramesRequest[k][request][1], :
+                ]
+                getXYZfromTrajGroup(
+                    refExport,
+                    trj,
+                    [FramesRequest[k][request][0]],
+                    f'Origin="-40 -40 -40" TranslateX="{pos[0]}" TranslateY="{pos[1]}" TranslateZ="{pos[2]}"',
+                    Selection=Selection,
+                )
 
     with File("References.hdf5", "w") as refFile:
         g = refFile.require_group("NPReferences")
         for k in references:
             saveReferences(g, k, references[k])
+
+
+# %%

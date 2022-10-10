@@ -180,7 +180,7 @@ topDownLabels = [
     ("v'", 3),  # 9
 ]
 pos = 0
-scaledict = {8: 1.75, 7: 1.65, 3: 1.55, 2: 1.35}
+scaledict = {8: 1.75, 7: 1.75, 3: 1.7, 2: 1.6}
 for i, (label, width) in enumerate(topDownLabels):
     place = (pos + width / 2) * 10
     pos += width
@@ -197,6 +197,7 @@ for i, (label, width) in enumerate(topDownLabels):
             arrowstyle=f"-[,widthB={scaledict[width]*width/2}, lengthB=1.5, angleB=0",  # ="-[",
             #    connectionstyle="arc3,rad=-0.05",
             color=reorderedColors[i],
+            lw=2
             #    shrinkA=5,
             #    shrinkB=5,
             #    patchB=l,

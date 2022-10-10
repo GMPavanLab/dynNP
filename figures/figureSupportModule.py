@@ -534,6 +534,12 @@ def addTmatBU(tempData, nat):
     )[bottomReordering_r][:, bottomReordering_r]
 
 
+def addTmatBUNN(tempData, nat):
+    tempData["tmatNN"] = tmatMakerNN(
+        SOAPclassification([], tempData["labelsNN"].reshape(-1, nat), bottomUpLabels)
+    )[bottomReordering_r][:, bottomReordering_r]
+
+
 def addTmatTD(tempData):
     tempData["tmat"] = tmatMaker(tempData["Class"])
 
@@ -549,7 +555,6 @@ def AddTmatsAndChord5_6_7(
     mask = data["tmat"] == 0
     tmatOpts = dict(
         ax=axesdict[f"tmat{T}"],
-        fmt="s",
         annot=None,
         mask=mask,
         square=True,
