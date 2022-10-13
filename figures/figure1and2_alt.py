@@ -34,9 +34,7 @@ def alternativeLayout(figsize, **figkwargs):
     mainGrid = fig.add_gridspec(3, 4)
 
     axes = dict()
-    axes.update(
-        fsm.createSimulationFigs(mainGrid[0, :].subgridspec(1, 4), fig, name="300")
-    )
+    axes.update(fsm.createS(mainGrid[0, :].subgridspec(1, 4), fig, name="300"))
     axes.update(
         fsm.createSimulationFigs(mainGrid[1, :].subgridspec(1, 4), fig, name="400")
     )
@@ -64,3 +62,17 @@ for np in ["ico309", "dh348_3_2_3", "to309_9_4"]:
     fig1.savefig(f"{np}_analysisBottomUp.png")
 
 #%%
+figsize = (5, 3)
+fig = plt.figure(figsize=figsize)
+mainGrid = fig.add_gridspec(1, 1)
+ax = fig.add_subplot(mainGrid[:])
+for i in range(8):
+    d = numpy.count_nonzero(
+        data["ico309"][300]["labelsNN"].reshape(1000, -1) == i, axis=-1, keepdims=True
+    )
+    ax.plot(range(1000), d, c=fsm.bottomUpColorMap[i])
+ax.set_ylabel("NAT per cluster")
+ax.set_xticks(list(range(0, 1001, 100)), [i / 10 for i in range(11)])
+ax.set_xlabel("MD time [$\mu$s]")
+fig.savefig(f"ico309_500Equilibrium.png", bbox_inches="tight", pad_inches=0, dpi=300)
+# %%

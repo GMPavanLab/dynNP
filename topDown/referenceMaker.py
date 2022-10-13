@@ -291,10 +291,10 @@ if __name__ == "__main__":
                     refExport,
                     trj,
                     [FramesRequest[k][request][0]],
-                    f'Origin="-40 -40 -40" TranslateX="{pos[0]}" TranslateY="{pos[1]}" TranslateZ="{pos[2]}"',
+                    f'Origin="-40 -40 -40" TranslateX="{pos[0]}" TranslateY="{pos[1]}" TranslateZ="{pos[2]}" name="{request}"',
                     Selection=Selection,
                 )
-
+    #%%
     with File("References.hdf5", "w") as refFile:
         g = refFile.require_group("NPReferences")
         for k in references:

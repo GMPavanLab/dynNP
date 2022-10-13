@@ -94,6 +94,9 @@ if __name__ == "__main__":
                 T,
                 cbarAx=None if T != 500 else axes["tmatCMAP"],
                 tmatOptions=dict(
+                    # cmap="vlag_r",
+                    # annot=fsm.getCompactedAnnotationsForTmat_percent(data[NP][T]["tmat"]),
+                    # fmt='s',
                     linewidth=1,
                     cbar_kws={} if T != 500 else {"label": "Probability"},
                 ),
@@ -112,7 +115,7 @@ if __name__ == "__main__":
             barWidth=0.16,
             barSpace=0.05,
         )
-        fig.savefig(f"figure{i}.png", bbox_inches="tight", pad_inches=0, dpi=300)
+#        fig.savefig(f"figure{i}.png", bbox_inches="tight", pad_inches=0, dpi=300)
 
 
 #%%
