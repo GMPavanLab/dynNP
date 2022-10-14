@@ -1,9 +1,11 @@
 from h5py import File
 from referenceMaker import getDefaultReferences, getDefaultReferencesSubdict
-from SOAPify import getDistancesFromRefNormalized
+from SOAPify import getDistancesFromRefNormalized, SOAPReferences
 
 
-def calculatedDistancesAndSave(references, SOAPFileName, classificationFile):
+def calculatedDistancesAndSave(
+    references: SOAPReferences, SOAPFileName: str, classificationFile: str, refFile: str
+):
 
     with File(
         SOAPFileName, "r" if SOAPFileName != classificationFile else "a"

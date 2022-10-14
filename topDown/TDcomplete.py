@@ -10,5 +10,7 @@ if __name__ == "__main__":
     for NPname in ["ico309", "dh348_3_2_3", "to309_9_4"]:
         SOAPFileName = f"../{NPname}soap.hdf5"
         classificationFile = f"../{NPname}TopBottom.hdf5"
-        calculatedDistancesAndSave(references, SOAPFileName, classificationFile)
+        calculatedDistancesAndSave(
+            references, SOAPFileName, classificationFile, refFile="References.hdf5"
+        )
         elaborateDistancesAndSave(classificationFile)

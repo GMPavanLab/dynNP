@@ -3,5 +3,5 @@
 source ~/envs/NPenv/bin/activate
 source ~/telemessage.sh
 
-python TDComplete.py
+python TDcomplete.py
 myecho "#hdf5: TDComplete  exited with code $?"
