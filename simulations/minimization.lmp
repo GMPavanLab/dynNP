@@ -1,0 +1,27 @@
+# -*- lammps -*-
+units           metal
+atom_style      atomic
+
+#INITIAL DATA
+read_data       ${dataFile}
+
+
+# --- SETUP ---
+# (1) NEIGHBOR LIST
+
+neigh_modify    delay 0 every 1
+# (2) FORCE FIELD
+pair_style	smatb/single
+pair_coeff	1 1 2.88 10.35	4.178	0.210	1.818	4.07293506	4.9883063257983666
+
+# (3) TIMESTEP
+timestep        0.001  #ps
+# (5) THERMO OUTPUTst
+thermo          1
+# (6) RESTART
+
+dump            myDump2 all atom 1 ${Structure}.minimization.lammpsdump
+minimize 1.0e-6 1.0e-8 1000 10000
+
+write_restart 	${Structure}.minimization.restart
+

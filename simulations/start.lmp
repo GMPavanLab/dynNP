@@ -1,0 +1,46 @@
+# -*- lammps -*-
+# --- PARAMETERS ---
+# (1) TEMPERATURE
+variable        tempDamp equal 0.05
+# (2) PRESSURE
+variable        pressure equal 1.
+variable        pressureDamp equal 1
+variable        pressureDamp2 equal 1
+# (3) SEED
+variable        seed world 74581 #93734 12832 21934
+
+units           metal
+atom_style      atomic
+
+#INITIAL DATA
+
+read_restart 	${simName}.equilibration.restart
+
+# --- SETUP ---
+# (1) NEIGHBOR LIST
+neigh_modify    delay 10 every 1
+# (2) FORCE FIELD 
+pair_style	smatb/single
+pair_coeff	1 1 2.88 10.35	4.178	0.210	1.818	4.07293506	4.9883063257983666
+
+# (3) TIMESTEP
+timestep        0.005  #ps
+# (4) OUTPUT SETTINGS
+variable        restartEvery equal 2000000 #10ns
+variable        dumpEvery    equal 20000   #100ps
+# (5) THERMO OUTPUT
+thermo          ${dumpEvery}
+
+# (6) RESTART
+restart         ${restartEvery} ${simName}.1.restart ${simName}.2.restart
+
+# DUMP
+dump           TrajDump all custom ${dumpEvery} ${simName}.lammpsdump id type x y z vx vy vz fx fy fz
+
+#velocity       all create ${Temp} ${seed_v} rot yes mom yes
+fix            fNVElngv all nve
+fix            fLNGV all langevin ${Temp} ${Temp} 100.0 ${seed_l} zero yes
+
+run	       400000000 #2us
+
+write_restart ${simName}.final.restart

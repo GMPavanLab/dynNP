@@ -1,0 +1,40 @@
+# -*- lammps -*-
+# --- PARAMETERS ---
+# (1) TEMPERATURE
+variable        temperature equal ${Temp}
+variable        tempDamp equal 0.05
+
+units           metal
+atom_style      atomic
+
+#INITIAL DATA
+read_restart 	${Structure}.minimization.restart
+
+# --- SETUP ---
+# (1) NEIGHBOR LIST
+neigh_modify    delay 10 every 1
+# (2) FORCE FIELD
+pair_style	smatb/single
+pair_coeff	1 1 2.88 10.35	4.178	0.210	1.818	4.07293506	4.9883063257983666
+
+# (3) TIMESTEP
+timestep        0.001  #ps
+# (4) OUTPUT SETTINGS
+variable        restartEvery equal 1000
+variable        dumpEvery equal 1000 #1ps
+# (5) THERMO OUTPUT
+thermo          ${restartEvery}
+# (6) RESTART
+restart         ${restartEvery} ${simName}.eq.1.restart ${simName}.eq.2.restart
+
+# DUMP
+dump            eqDump all custom ${dumpEvery} ${simName}.eq.lammpsdump id type x y z vx vy vz fx fy fz
+
+velocity       all create ${Temp} ${seed_v} rot yes mom yes
+fix            fNVElngv all nve
+fix            fLNGV all langevin ${Temp} ${Temp} 100.0 ${seed_l} zero yes
+run            20000
+
+
+write_data 	        ${simName}.equilibration.data
+write_restart 	${simName}.equilibration.restart
