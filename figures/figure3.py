@@ -11,11 +11,9 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 #%%
 AtomID = 155
 data = {300: dict(), 400: dict(), 500: dict()}
-fsm.loadClassificationBottomUp(data, "../bottomUp/ico309classifications.hdf5")
-for T in [300, 400, 500]:
-    data[T]["labelsNN"] = data[T]["labelsNN"].reshape(1000, -1)
+fsm.loadClassificationBottomUp("../bottomUp/ico309classifications.hdf5", data, "ico309")
 dictionary = numpy.array([fsm.bottomReordering_r.index(i) for i in range(8)])
-colors = [fsm.bottomUpColorMap[i] for i in data[300]["labelsNN"][:, AtomID]]
+colors = [fsm.bottomUpColorMap[i] for i in data[300]["ClassBU"].references[:, AtomID]]
 #%%
 figsize = numpy.array([4, 2]) * 3
 
@@ -42,18 +40,18 @@ for ax in [axes[f"followGraph"], axes[f"graphT400"]]:
 
 axes[f"followGraph"].scatter(
     frames,
-    dictionary[data[300]["labelsNN"][:, AtomID]],
+    dictionary[data[300]["ClassBU"].references[:, AtomID]],
     c=colors,
 )
 
 axes[f"followGraph"].plot(
-    frames, dictionary[data[300]["labelsNN"][:, AtomID]], c="k", alpha=0.5
+    frames, dictionary[data[300]["ClassBU"].references[:, AtomID]], c="k", alpha=0.5
 )
 axes[f"followGraph"].set_ylim(-0.25, 7.25)
 for T in [300, 400, 500]:
-    for i in range(data[T]["labelsNN"].shape[-1]):
+    for i in range(data[T]["ClassBU"].references.shape[-1]):
         axes[f"graphT{T}"].plot(
-            frames, dictionary[data[T]["labelsNN"][:, i]], c="k", alpha=0.025
+            frames, dictionary[data[T]["ClassBU"].references[:, i]], c="k", alpha=0.025
         )
 for ax in [axes[f"followGraph"], axes[f"graphT400"]]:
     ax.tick_params(axis="y", which="major", pad=15)

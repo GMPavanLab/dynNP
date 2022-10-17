@@ -38,7 +38,7 @@ def plotLineAndProfile(data, LS, LE, axLine, axProfile, color="b"):
 
 
 #%%
-data = fsm.dataLoaderBottomUp("../bottomUp/ico309soap.hdf5")
+data = fsm.pcaLoaderBottomUp("../bottomUp/ico309soap.hdf5")
 fsm.loadClassificationBottomUp(data, "../bottomUp/ico309classifications.hdf5")
 
 fsm.addPseudoFes(data[300], 150, rangeHisto=[data["xlims"], data["ylims"]])

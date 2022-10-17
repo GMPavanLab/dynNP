@@ -33,6 +33,7 @@ def getT(s):
     if match:
         return int(match.group(1))
     else:
+        # this is a trick for loading data in createXYZ.py
         return "Ideal"
 
 
@@ -199,7 +200,7 @@ def getMax(proposed: float, concurrentArray):
     return getF(proposed, concurrentArray, numpy.max)
 
 
-def dataLoaderBottomUp(filename):
+def pcaLoaderBottomUp(filename: str, TimeStride: slice = slice(None)):
     dataContainer = dict()
     dataContainer["xlims"] = [numpy.finfo(float).max, numpy.finfo(float).min]
     dataContainer["ylims"] = [numpy.finfo(float).max, numpy.finfo(float).min]
@@ -208,7 +209,7 @@ def dataLoaderBottomUp(filename):
         for k in pcas:
             dataContainer["nat"] = f[f"/SOAP/{k}"].shape[1]
             T = getT(k)
-            dataContainer[T] = dict(pca=pcas[k][:, :, :2].reshape(-1, 2))
+            dataContainer[T] = dict(pca=pcas[k][TimeStride, :, :2].reshape(-1, 2))
             dataContainer["xlims"][0] = getMin(
                 dataContainer["xlims"][0], dataContainer[T]["pca"][:, 0]
             )
@@ -225,17 +226,63 @@ def dataLoaderBottomUp(filename):
     return dataContainer
 
 
-def dataLoaderTopDown(classificationFile: str, data: dict, NPname: str):
+def loadClassification(
+    classificationFile: str,
+    dataContainer: dict,
+    NPname: str,
+    ClassificationPlace: str,
+    ClassNameToFind: str,
+    ClassNameToSave: str,
+    TimeStride: slice = slice(None),
+):
+    with h5py.File(classificationFile, "r") as f:
+        Simulations = f[ClassificationPlace]
+        for k in Simulations:
+            if NPname in k:
+                T = getT(k)
+                if T not in dataContainer:
+                    dataContainer[T] = dict()
+                dataContainer[T][ClassNameToSave] = SOAPclassification(
+                    [], Simulations[k][ClassNameToFind][TimeStride], bottomUpLabels
+                )
+
+
+def loadClassificationBottomUp(
+    classificationFile: str,
+    dataContainer: dict,
+    NPname: str,
+    TimeStride: slice = slice(None),
+):
+    loadClassification(
+        classificationFile,
+        dataContainer,
+        NPname,
+        ClassificationPlace="/Classifications/ico309-SV_18631-SL_31922-T_300",
+        ClassNameToFind="labelsNN",
+        ClassNameToSave="ClassBU",
+        TimeStride=TimeStride,
+    )
+
+
+def loadClassificationTopDown(
+    classificationFile: str, data: dict, NPname: str, TimeStride: slice = slice(None)
+):
+
+    ClassificationPlace = "Classifications/icotodh"
+    ClassNameToSave = "ClassTD"
     with h5py.File(classificationFile, "r") as distFile:
-        ClassG = distFile["Classifications/icotodh"]
+        ClassG = distFile[ClassificationPlace]
         for k in ClassG:
             if NPname in k:
                 T = getT(k)
                 if T not in data:
                     data[T] = dict()
-                classification = ClassG[k][:]
+                classification = ClassG[k][TimeStride]
+                # this
                 clusterized = topDownClusters[classification]
-                data[T]["Class"] = SOAPclassification([], clusterized, topDownLabels)
+                data[T][ClassNameToSave] = SOAPclassification(
+                    [], clusterized, topDownLabels
+                )
 
 
 #%% Layouts
@@ -439,15 +486,6 @@ def makeLayout6and7(labelsOptions=dict(), **figkwargs):
 
 
 #%%
-def loadClassificationBottomUp(dataContainer, filename):
-    with h5py.File(filename, "r") as f:
-        Simulations = f["/Classifications/ico309-SV_18631-SL_31922-T_300"]
-        for k in Simulations:
-            T = getT(k)
-            dataContainer[T]["labelsNN"] = Simulations[k]["labelsNN"][:].reshape(-1)
-
-
-#%%
 def addPseudoFes(tempData, bins=300, rangeHisto=None):
     hist, xedges, yedges = numpy.histogram2d(
         tempData["pca"][:, 0],
@@ -528,24 +566,24 @@ def getCompactedAnnotationsForTmat_percent(tmat) -> list:
     return annot
 
 
-def addTmatBU(tempData, nat):
-    tempData["tmat"] = tmatMaker(
-        SOAPclassification([], tempData["labelsNN"].reshape(-1, nat), bottomUpLabels)
-    )[bottomReordering_r][:, bottomReordering_r]
+def addTmatBU(tempData):
+    tempData["tmat"] = tmatMaker(tempData["ClassBU"])[bottomReordering_r][
+        :, bottomReordering_r
+    ]
 
 
-def addTmatBUNN(tempData, nat):
-    tempData["tmatNN"] = tmatMakerNN(
-        SOAPclassification([], tempData["labelsNN"].reshape(-1, nat), bottomUpLabels)
-    )[bottomReordering_r][:, bottomReordering_r]
+def addTmatBUNN(tempData):
+    tempData["tmatNN"] = tmatMakerNN(tempData["ClassBU"])[bottomReordering_r][
+        :, bottomReordering_r
+    ]
 
 
 def addTmatTD(tempData):
-    tempData["tmat"] = tmatMaker(tempData["Class"])
+    tempData["tmat"] = tmatMaker(tempData["ClassTD"])
 
 
 def addTmatNNTD(tempData):
-    tempData["tmatNN"] = tmatMakerNN(tempData["Class"])
+    tempData["tmatNN"] = tmatMakerNN(tempData["ClassTD"])
 
 
 def AddTmatsAndChord5_6_7(
@@ -599,7 +637,7 @@ def HistoMaker(
     nHisto = len(topDownLabels)
     if positions is None:
         positions = range(nHisto)
-    t = data["Ideal"]["Class"]
+    t = data["Ideal"]["ClassTD"]
     order = ["Ideal", 300, 400, 500]
     countMean = {T: numpy.zeros((nHisto), dtype=float) for T in data}
     countDev = {T: numpy.zeros((nHisto), dtype=float) for T in data}
@@ -615,7 +653,7 @@ def HistoMaker(
             dev += barWidth + barSpace
             if T == "Ideal":
                 continue
-            countC = numpy.count_nonzero(data[T]["Class"].references == c, axis=-1)
+            countC = numpy.count_nonzero(data[T]["ClassTD"].references == c, axis=-1)
             countMean[T][c] = numpy.mean(countC)
             countDev[T][c] = numpy.std(countC)
     ax.set_xticks(
@@ -684,7 +722,7 @@ def plotTemperatureData(axesdict, T, data, xlims, ylims, zoom=0.01, smooth=0.0):
         data["pca"][:, 0],
         data["pca"][:, 1],
         s=0.1,
-        c=bottomUpColorMap[data["labelsNN"]],
+        c=bottomUpColorMap[data["ClassBU"].references.reshape(-1)],
         alpha=0.5,
     )
     axesdict[f"pca{T}Ax"].contour(

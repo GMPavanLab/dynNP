@@ -94,8 +94,8 @@ refs = getDefaultReferences("../topDown/References.hdf5")
 for NPname in ["ico309"]:
     data[NPname] = dict()
     classificationFile = f"../topDown/{NPname}TopBottom.hdf5"
-    fsm.dataLoaderTopDown(classificationFile, data[NPname], NPname)
-    fsm.dataLoaderTopDown("../minimized.hdf5", data[NPname], NPname)
+    fsm.loadClassificationTopDown(classificationFile, data[NPname], NPname)
+    fsm.loadClassificationTopDown("../minimized.hdf5", data[NPname], NPname)
 
 
 for NP in data:
@@ -105,7 +105,7 @@ for NP in data:
         fsm.addTmatTD(data[NP][T])
         fsm.addTmatNNTD(data[NP][T])
 
-
+#%%
 def work(data, NP):
     figsize = numpy.array([3.8, 3]) * 4
     fig, axes = fsm.makeLayout6and7(
@@ -141,3 +141,29 @@ def work(data, NP):
 
 for NP in data:
     work(data, NP)
+
+# %%
+import seaborn
+
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+mask = data[NP][300]["tmatNN"] == 0
+i = 0
+tmatOpts = dict(
+    ax=ax[i],
+    annot=True,
+    mask=mask,
+    square=True,
+    cmap="rocket_r",
+    # vmax=1,
+    # vmin=0,
+    xticklabels=False,
+    yticklabels=False,
+    linewidth=1,
+)
+# tmatOpts.update(tmatOptions)
+seaborn.heatmap(
+    data[NP][300]["tmat"],
+    **tmatOpts,
+)
+reorder = list(range(10))
+fsm.decorateTmatWithLegend("topDown", reorder, ax[i], zoom=0.02)

@@ -14,8 +14,8 @@ data = {}
 for NPname in ["dh348_3_2_3", "to309_9_4"]:
     data[NPname] = dict()
     classificationFile = f"../topDown/{NPname}TopBottom.hdf5"
-    fsm.dataLoaderTopDown(classificationFile, data[NPname], NPname)
-    fsm.dataLoaderTopDown("../minimized.hdf5", data[NPname], NPname)
+    fsm.loadClassificationTopDown(classificationFile, data[NPname], NPname)
+    fsm.loadClassificationTopDown("../minimized.hdf5", data[NPname], NPname)
 
 
 for NP in data:
@@ -35,26 +35,26 @@ def addNPImages(axes, data, NP):
     for T in ["Ideal", 300, 400, 500]:
         p = [1.0]
         if T == "Ideal":
-            ideal = data[T]["Class"].references[0]
+            ideal = data[T]["ClassTD"].references[0]
             clusters0K += [
                 c for c in range(3, 10) if numpy.count_nonzero(ideal == c) > 0
             ]
         elif len(clusters0K) != 7:
             # print(clusters0K)
             clusterCountNotID = numpy.zeros(
-                (data[T]["Class"].references.shape[0]), dtype=float
+                (data[T]["ClassTD"].references.shape[0]), dtype=float
             )
             clusterCountID = numpy.zeros(
-                (data[T]["Class"].references.shape[0]), dtype=float
+                (data[T]["ClassTD"].references.shape[0]), dtype=float
             )
             for c in range(3, 10):
                 if c in clusters0K:
                     clusterCountID += numpy.count_nonzero(
-                        data[T]["Class"].references == c, axis=-1
+                        data[T]["ClassTD"].references == c, axis=-1
                     )
                 else:
                     clusterCountNotID += numpy.count_nonzero(
-                        data[T]["Class"].references == c, axis=-1
+                        data[T]["ClassTD"].references == c, axis=-1
                     )
             surfClusters = clusterCountID + clusterCountNotID
             clusterCountID /= surfClusters

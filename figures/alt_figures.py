@@ -57,7 +57,7 @@ for T in [300, 400, 500]:
 
 for NPname in [ChosenNP]:
     classificationFile = f"../topDown/{NPname}TopBottom.hdf5"
-    fsm.dataLoaderTopDown(classificationFile, data[NPname], NPname)
+    fsm.loadClassificationTopDown(classificationFile, data[NPname], NPname)
 #%%
 def dataLoaderBottomUpMinimized(filename, k):
     import h5py
@@ -83,7 +83,7 @@ ax.scatter(
     data[ChosenNP][300]["pca"][:, 1],
     s=0.1,
     c=numpy.array(fsm.topDownColorMap)[
-        data[ChosenNP][300]["Class"].references.reshape(-1)
+        data[ChosenNP][300]["ClassTD"].references.reshape(-1)
     ],
     alpha=0.5,
 )

@@ -101,14 +101,14 @@ def trainNoiseClassifier(soapFile, fitsetAddress):
 
 def classifyNPs(
     hdnc: hdbscanNoiseClassifier,
-    PCAFile: str,
+    soapFile: str,
     PCAGroupAddr: str,
     outFile: str,
     whereToSave: str,
 ):
-    print(f"Working on {PCAFile} and saving on on {outFile}")
+    print(f"Working on {soapFile} and saving on on {outFile}")
     t1_start = perf_counter()
-    with h5py.File(PCAFile, "r") as datafile:
+    with h5py.File(soapFile, "r") as datafile:
         g = datafile[PCAGroupAddr]
         for k in g.keys():
             myshape = g[k].shape
@@ -144,7 +144,7 @@ def classifyNPs(
                     data=mem.reshape(memshape),
                 )
     t1_stop = perf_counter()
-    print(f"Time for {fname}: {t1_stop - t1_start} s")
+    print(f"Time for {soapFile} -> {outFile}: {t1_stop - t1_start} s")
 
 
 #%% minimized NPs
@@ -223,7 +223,7 @@ if __name__ == "__main__":
     for fname in ["ico309", "dh348_3_2_3", "to309_9_4"]:
         classifyNPs(
             hdnc,
-            PCAFile=f"{fname}soap.hdf5",
+            soapFile=f"{fname}soap.hdf5",
             PCAGroupAddr="PCAs/ico309-SV_18631-SL_31922-T_300",
             outFile=f"{fname}classifications.hdf5",
             whereToSave="Classifications/ico309-SV_18631-SL_31922-T_300",

@@ -24,8 +24,8 @@ refs = getDefaultReferences("../topDown/References.hdf5")
 for NPname in ["ico309"]:
     data[NPname] = dict()
     classificationFile = f"../topDown/{NPname}TopBottom.hdf5"
-    fsm.dataLoaderTopDown(classificationFile, data[NPname], NPname)
-    fsm.dataLoaderTopDown("../minimized.hdf5", data[NPname], NPname)
+    fsm.loadClassificationTopDown(classificationFile, data[NPname], NPname)
+    fsm.loadClassificationTopDown("../minimized.hdf5", data[NPname], NPname)
 
 
 for NP in data:

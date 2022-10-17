@@ -7,15 +7,12 @@ from matplotlib.image import imread
 
 #%%
 def getData(np):
-    data = fsm.dataLoaderBottomUp(f"../bottomUp/{np}soap.hdf5")
-    fsm.loadClassificationBottomUp(data, f"../bottomUp/{np}classifications.hdf5")
+    data = fsm.pcaLoaderBottomUp(f"../bottomUp/{np}soap.hdf5")
+    fsm.loadClassificationBottomUp(f"../bottomUp/{np}classifications.hdf5", data, np)
     nat = data["nat"]
-    fsm.addPseudoFes(data[300], 150, rangeHisto=[data["xlims"], data["ylims"]])
-    fsm.addPseudoFes(data[400], 150, rangeHisto=[data["xlims"], data["ylims"]])
-    fsm.addPseudoFes(data[500], 150, rangeHisto=[data["xlims"], data["ylims"]])
-    fsm.addTmatBU(data[300], nat)
-    fsm.addTmatBU(data[400], nat)
-    fsm.addTmatBU(data[500], nat)
+    for T in [300, 400, 500]:
+        fsm.addPseudoFes(data[T], 150, rangeHisto=[data["xlims"], data["ylims"]])
+        fsm.addTmatBU(data[T])
     return data
 
 
@@ -68,7 +65,9 @@ mainGrid = fig.add_gridspec(1, 1)
 ax = fig.add_subplot(mainGrid[:])
 for i in range(8):
     d = numpy.count_nonzero(
-        data["ico309"][300]["labelsNN"].reshape(1000, -1) == i, axis=-1, keepdims=True
+        data["ico309"][300]["ClassBU"].references.reshape(1000, -1) == i,
+        axis=-1,
+        keepdims=True,
     )
     ax.plot(range(1000), d, c=fsm.bottomUpColorMap[i])
 ax.set_ylabel("NAT per cluster")

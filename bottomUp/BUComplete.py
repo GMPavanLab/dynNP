@@ -19,7 +19,7 @@ hdnc = trainNoiseClassifier(
 for fname in ["ico309", "dh348_3_2_3", "to309_9_4"]:
     classifyNPs(
         hdnc,
-        PCAFile=f"../{fname}pca.hdf5",
+        soapFile=f"../{fname}pca.hdf5",
         PCAGroupAddr="PCAs/ico309-SV_18631-SL_31922-T_300",
         outFile=f"../{fname}classifications.hdf5",
         whereToSave="Classifications/ico309-SV_18631-SL_31922-T_300",

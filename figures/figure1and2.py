@@ -5,15 +5,12 @@ from matplotlib.image import imread
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
 #%%
-data = fsm.dataLoaderBottomUp("../bottomUp/ico309soap.hdf5")
-fsm.loadClassificationBottomUp(data, "../bottomUp/ico309classifications.hdf5")
+data = fsm.pcaLoaderBottomUp("../bottomUp/ico309soap.hdf5")
+fsm.loadClassificationBottomUp("../bottomUp/ico309classifications.hdf5", data, "ico309")
+for T in [300, 400, 500]:
+    fsm.addPseudoFes(data[T], 150, rangeHisto=[data["xlims"], data["ylims"]])
+    fsm.addTmatBU(data[T])
 
-fsm.addPseudoFes(data[300], 150, rangeHisto=[data["xlims"], data["ylims"]])
-fsm.addPseudoFes(data[400], 150, rangeHisto=[data["xlims"], data["ylims"]])
-fsm.addPseudoFes(data[500], 150, rangeHisto=[data["xlims"], data["ylims"]])
-fsm.addTmatBU(data[300], 309)
-fsm.addTmatBU(data[400], 309)
-fsm.addTmatBU(data[500], 309)
 
 #%%
 figsize = numpy.array([2, 1]) * 8
