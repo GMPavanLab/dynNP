@@ -37,9 +37,9 @@ for file in *.data; do
 		-v seed_l "${seedL}" \
 		-v Temp "${Temp}" \
 		-log "${simName}.eq.log" \
-		-in equilibration.lmp > /dev/null
+		-in thermalization.lmp > /dev/null
 	    
-	    echo "lmp: equilibration ${simName} exited with code $?"
+	    echo "lmp: thermalization ${simName} exited with code $?"
 
 	    lmp -v name "${dir}" \
 		-v dataFile "${file}" \
