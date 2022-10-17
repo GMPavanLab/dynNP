@@ -200,16 +200,16 @@ def getMax(proposed: float, concurrentArray):
     return getF(proposed, concurrentArray, numpy.max)
 
 
-def pcaLoaderBottomUp(filename: str, TimeStride: slice = slice(None)):
+def pcaLoaderBottomUp(filename: str, TimeWindow: slice = slice(None)):
     dataContainer = dict()
     dataContainer["xlims"] = [numpy.finfo(float).max, numpy.finfo(float).min]
     dataContainer["ylims"] = [numpy.finfo(float).max, numpy.finfo(float).min]
     with h5py.File(filename, "r") as f:
         pcas = f["/PCAs/ico309-SV_18631-SL_31922-T_300"]
         for k in pcas:
-            dataContainer["nat"] = f[f"/SOAP/{k}"].shape[1]
+            dataContainer["nat"] = pcas[k].shape[1]
             T = getT(k)
-            dataContainer[T] = dict(pca=pcas[k][TimeStride, :, :2].reshape(-1, 2))
+            dataContainer[T] = dict(pca=pcas[k][TimeWindow, :, :2].reshape(-1, 2))
             dataContainer["xlims"][0] = getMin(
                 dataContainer["xlims"][0], dataContainer[T]["pca"][:, 0]
             )
@@ -233,7 +233,7 @@ def loadClassification(
     ClassificationPlace: str,
     ClassNameToFind: str,
     ClassNameToSave: str,
-    TimeStride: slice = slice(None),
+    TimeWindow: slice = slice(None),
 ):
     with h5py.File(classificationFile, "r") as f:
         Simulations = f[ClassificationPlace]
@@ -243,7 +243,7 @@ def loadClassification(
                 if T not in dataContainer:
                     dataContainer[T] = dict()
                 dataContainer[T][ClassNameToSave] = SOAPclassification(
-                    [], Simulations[k][ClassNameToFind][TimeStride], bottomUpLabels
+                    [], Simulations[k][ClassNameToFind][TimeWindow], bottomUpLabels
                 )
 
 
@@ -251,7 +251,7 @@ def loadClassificationBottomUp(
     classificationFile: str,
     dataContainer: dict,
     NPname: str,
-    TimeStride: slice = slice(None),
+    TimeWindow: slice = slice(None),
 ):
     loadClassification(
         classificationFile,
@@ -260,12 +260,12 @@ def loadClassificationBottomUp(
         ClassificationPlace="/Classifications/ico309-SV_18631-SL_31922-T_300",
         ClassNameToFind="labelsNN",
         ClassNameToSave="ClassBU",
-        TimeStride=TimeStride,
+        TimeWindow=TimeWindow,
     )
 
 
 def loadClassificationTopDown(
-    classificationFile: str, data: dict, NPname: str, TimeStride: slice = slice(None)
+    classificationFile: str, data: dict, NPname: str, TimeWindow: slice = slice(None)
 ):
 
     ClassificationPlace = "Classifications/icotodh"
@@ -277,7 +277,7 @@ def loadClassificationTopDown(
                 T = getT(k)
                 if T not in data:
                     data[T] = dict()
-                classification = ClassG[k][TimeStride]
+                classification = ClassG[k][TimeWindow]
                 # this
                 clusterized = topDownClusters[classification]
                 data[T][ClassNameToSave] = SOAPclassification(
@@ -567,23 +567,23 @@ def getCompactedAnnotationsForTmat_percent(tmat) -> list:
 
 
 def addTmatBU(tempData):
-    tempData["tmat"] = tmatMaker(tempData["ClassBU"])[bottomReordering_r][
+    tempData["tmatBU"] = tmatMaker(tempData["ClassBU"])[bottomReordering_r][
         :, bottomReordering_r
     ]
 
 
 def addTmatBUNN(tempData):
-    tempData["tmatNN"] = tmatMakerNN(tempData["ClassBU"])[bottomReordering_r][
+    tempData["tmatBUNN"] = tmatMakerNN(tempData["ClassBU"])[bottomReordering_r][
         :, bottomReordering_r
     ]
 
 
 def addTmatTD(tempData):
-    tempData["tmat"] = tmatMaker(tempData["ClassTD"])
+    tempData["tmatTD"] = tmatMaker(tempData["ClassTD"])
 
 
-def addTmatNNTD(tempData):
-    tempData["tmatNN"] = tmatMakerNN(tempData["ClassTD"])
+def addTmatTDNN(tempData):
+    tempData["tmatTDNN"] = tmatMakerNN(tempData["ClassTD"])
 
 
 def AddTmatsAndChord5_6_7(
@@ -606,7 +606,7 @@ def AddTmatsAndChord5_6_7(
     )
     tmatOpts.update(tmatOptions)
     seaborn.heatmap(
-        data["tmat"],
+        data["tmatBU"],
         **tmatOpts,
     )
     decorateTmatWithLegend("topDown", reorder, axesdict[f"tmat{T}"], zoom=zoom)
@@ -618,7 +618,7 @@ def AddTmatsAndChord5_6_7(
     chordOpts.update(chordOptions)
 
     ChordDiagram(
-        data["tmatNN"],
+        data["tmatBUNN"],
         **chordOpts,
     )
     for ax in [axesdict[f"chord{T}"], axesdict[f"tmat{T}"]]:
@@ -759,10 +759,10 @@ def plotTemperatureData(axesdict, T, data, xlims, ylims, zoom=0.01, smooth=0.0):
         cax=axesdict[f"cbarFes{T}Ax"],
         label="$[k_BT]$",  # "_{\!_{" + self.sub + "}}"
     )
-    mask = data["tmat"] == 0
-    annots = getCompactedAnnotationsForTmat_percent(data["tmat"])
+    mask = data["tmatBU"] == 0
+    annots = getCompactedAnnotationsForTmat_percent(data["tmatBU"])
     seaborn.heatmap(
-        data["tmat"],
+        data["tmatBU"],
         linewidths=0.1,
         ax=axesdict[f"tmat{T}Ax"],
         fmt="s",

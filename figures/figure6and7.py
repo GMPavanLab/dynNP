@@ -23,7 +23,7 @@ for NP in data:
         if T == "Ideal":
             continue
         fsm.addTmatTD(data[NP][T])
-        fsm.addTmatNNTD(data[NP][T])
+        fsm.addTmatTDNN(data[NP][T])
 
 
 #%%

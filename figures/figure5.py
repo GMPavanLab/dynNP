@@ -33,7 +33,7 @@ for NP in data:
         if T == "Ideal":
             continue
         fsm.addTmatTD(data[NP][T])
-        fsm.addTmatNNTD(data[NP][T])
+        fsm.addTmatTDNN(data[NP][T])
 #%%
 figsize = numpy.array([5, 4]) * 3
 zoom = 0.01
