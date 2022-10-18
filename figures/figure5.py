@@ -114,8 +114,8 @@ axes[f"legend"].set_xlim(-0.5, 9.5)
 axes[f"legend"].set_ylim(-0.5, 0.5)
 axes[f"legend"].axis("off")
 pos = 0
-scaledict = {1: 1.35, 2: 2.5, 3: 3}
-scaledictH = {1: 1.35, 2: 2.8, 3: 3.5}
+scaledict = {1: 1.35, 2: 2.75, 3: 3.4}
+scaledictH = {1: 1.35, 2: 3.0, 3: 3.9}
 for label, width in [
     ("bulk", 1),
     ("subSurf", 2),

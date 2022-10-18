@@ -14,7 +14,7 @@ for file in *.data; do
 	
 	echo "lmp: minimization ${dir} exited with code $?"
 
-	#for reproducing the calculation used in thes paper use
+	#for reproducing the calculation used in this paper, please use
 	# for ico 309
 	# 	seedV=18631
     # 	seedL=31922
