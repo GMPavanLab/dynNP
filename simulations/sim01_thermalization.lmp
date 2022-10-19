@@ -25,10 +25,10 @@ variable        dumpEvery equal 1000 #1ps
 # (5) THERMO OUTPUT
 thermo          ${restartEvery}
 # (6) RESTART
-restart         ${restartEvery} ${simName}.eq.1.restart ${simName}.eq.2.restart
+restart         ${restartEvery} ${simName}.th.1.restart ${simName}.th.2.restart
 
 # DUMP
-dump            eqDump all custom ${dumpEvery} ${simName}.eq.lammpsdump id type x y z vx vy vz fx fy fz
+dump            eqDump all custom ${dumpEvery} ${simName}.th.lammpsdump id type x y z vx vy vz fx fy fz
 
 velocity       all create ${Temp} ${seed_v} rot yes mom yes
 fix            fNVElngv all nve
@@ -36,5 +36,5 @@ fix            fLNGV all langevin ${Temp} ${Temp} 100.0 ${seed_l} zero yes
 run            20000
 
 
-write_data 	        ${simName}.equilibration.data
-write_restart 	${simName}.equilibration.restart
+write_data 	        ${simName}.thermalization.data
+write_restart 	${simName}.thermalization.restart
