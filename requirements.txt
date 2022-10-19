@@ -6,5 +6,5 @@ seaborn
 sklearn
 hdbscan
 #some images are made with ovito
-#ovito
+ovito
 
