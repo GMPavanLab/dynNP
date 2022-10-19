@@ -1,7 +1,7 @@
 #!/bin/bash
 
-for file in *.data; do
-    dir=${file%.data}
+doSimulations(){
+    dir=${1%.data}
     (
 
 	lmp -v name "${dir}" \
@@ -13,19 +13,9 @@ for file in *.data; do
 	    -in sim00_minimization.lmp > /dev/null
 	
 	echo "lmp: minimization ${dir} exited with code $?"
-
-	#for reproducing the calculation used in this paper, please use
-	# for ico 309
-	# 	seedV=18631
-    # 	seedL=31922
-	# for to 309_9_4
-	# 	seedV=2772
-    # 	seedL=20750
-	# for dh 348_3_2_3
-	# 	seedV=27839
-    # 	seedL=19921
-    seedV=$RANDOM
-    seedL=$RANDOM
+	)
+    seedV=$2
+    seedL=$3
     for Temp in 300 400 500; do
 	simName="${dir}-SV_${seedV}-SL_${seedL}-T_${Temp}"
 	(	    
@@ -53,4 +43,25 @@ for file in *.data; do
 	    echo "lmp: production ${simName} exited with code $?"
 	) &
     done
-done
+}
+
+# for file in *.data; do
+#     seedV=$RANDOM
+#     seedL=$RANDOM
+# 	doSimulations "$file" "$seedV" "$seedL"
+# done
+
+#for reproducing the calculation used in this paper, please use
+# for ico 309
+# 	seedV=18631
+# 	seedL=31922
+# for to 309_9_4
+# 	seedV=2772
+# 	seedL=20750
+# for dh 348_3_2_3
+# 	seedV=27839
+# 	seedL=19921
+
+doSimulations ico309.data 18631 31922
+doSimulations dh348_3_2_3.data 2772 20750
+doSimulations to309_9_4.data 27839 19921
