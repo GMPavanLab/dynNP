@@ -4,9 +4,9 @@ from sklearn.decomposition import PCA
 import SOAPify
 
 #%%
-def preparePCAFitSet(fitsetData: h5py.Dataset, PCAdim: int):
+def preparePCAFitSet(fitsetData: h5py.Dataset, PCAdim: int, dataSetSlice:slice=slice(None)):
     # given a fitset makes the PCA algorithm learn the parameters
-    fitset = fitsetData[:].reshape(-1, fitsetData.shape[-1])
+    fitset = fitsetData[dataSetSlice].reshape(-1, fitsetData.shape[-1])
     print(fitset.shape)
     lmax = fitsetData.attrs["l_max"]
     nmax = fitsetData.attrs["n_max"]

@@ -80,13 +80,11 @@ class hdbscanNoiseClassifier:
 
 
 #%%
-def trainNoiseClassifier(soapFile, fitsetAddress):
+def trainNoiseClassifier(soapFile:str, fitsetAddress:str, fitSetSlice: slice = slice(None)):
     t1_start = perf_counter()
 
-    with h5py.File("ico309soap.hdf5", "r") as fitfile:
-        fitset = fitfile[
-            "PCAs/ico309-SV_18631-SL_31922-T_300/ico309-SV_18631-SL_31922-T_300"
-        ][:, :, :3].reshape(-1, 3)
+    with h5py.File(soapFile, "r") as fitfile:
+        fitset = fitfile[fitsetAddress][fitSetSlice, :, :3].reshape(-1, 3)
         hdnc = hdbscanNoiseClassifier(
             fitset, min_cluster_size=125, cluster_selection_method="eom"
         )
