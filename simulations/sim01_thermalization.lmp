@@ -28,7 +28,7 @@ thermo          ${restartEvery}
 restart         ${restartEvery} ${simName}.th.1.restart ${simName}.th.2.restart
 
 # DUMP
-dump            eqDump all custom ${dumpEvery} ${simName}.th.lammpsdump id type x y z vx vy vz fx fy fz
+dump            eqDump all custom ${dumpEvery} ${simName}.th.lammpstrj id type x y z vx vy vz fx fy fz
 
 velocity       all create ${Temp} ${seed_v} rot yes mom yes
 fix            fNVElngv all nve

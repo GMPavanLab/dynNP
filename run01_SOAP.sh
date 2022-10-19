@@ -3,6 +3,7 @@
 source ./NPenv/bin/activate
 
 python createHDF5Args.py ../simulations/*.lammpsdump
+python createHDF5Minimized.py ../simulations/*.minimization.data
 echo "#hdf5e5:  exited with code $?"
 for h5 in *.hdf5; do
     if [[ "$h5"  == *fitted* || "$h5"  == *soap* || "$h5"  ==  *classifications* || "$h5"  ==  *pca*  || "$h5"  == *TopBottom* ]]; then

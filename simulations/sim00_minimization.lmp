@@ -20,8 +20,8 @@ timestep        0.001  #ps
 thermo          1
 # (6) RESTART
 
-dump            myDump2 all atom 1 ${Structure}.minimization.lammpsdump
+dump            myDump2 all atom 1 ${Structure}.minimization.lammpstrj
 minimize 1.0e-6 1.0e-8 1000 10000
 
 write_restart 	${Structure}.minimization.restart
-
+write_data 	    ${Structure}.minimization.data
