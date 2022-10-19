@@ -7,3 +7,4 @@ figures/*.xyz
 !figures/*CMAP.png
 !figures/Scissors.png
 .vscode
+.pytest_cache

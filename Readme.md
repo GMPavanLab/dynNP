@@ -8,3 +8,9 @@ source ./NPenv/bin/activate
 pip install -U pip wheel
 pip install -r requirements.txt
 ```
+
+
+
+## Short time analysis
+
+To reproduce the analysis in the paper 
