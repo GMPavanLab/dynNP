@@ -76,7 +76,7 @@ def addNPImages(axes, data, NP):
             p += [0]
 
         pieax.annotate(
-            f"{int(p[1]*100)}%", (0, 0), (1, -1), color="#ed2fce", fontsize=15
+            f" {int(p[1]*100)}%", (0, 0), (1, -1), color="#ed2fce", fontsize=15
         )
 
 

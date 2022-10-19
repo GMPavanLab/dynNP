@@ -1,6 +1,7 @@
 #%%
 import figureSupportModule as fsm
 import numpy
+from matplotlib.ticker import MaxNLocator
 from matplotlib.image import imread
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
@@ -42,35 +43,26 @@ def getFullDataStrided(np, window):
     return data
 
 
-#%%
-ico309_1ns = getFullData("ico309")
-ico309_100ps = getFullDataStrided("ico309", slice(10000, None, None))
-ico309_200ps = getFullDataStrided("ico309", slice(10000, None, 2))
-#%%
-ico309_100psFull = getFullDataStrided("ico309", slice(None))
-ico309_1nsFull = getFullDataStrided("ico309", slice(None, None, 10))
-#%%
-figsize = numpy.array([3, 1]) * 10
-zoom = 0.02
-
-for i, (mytmat, legendNames, reordering) in enumerate(
-    [
-        ("tmatBUNN", "bottomUp", fsm.bottomReordering_r),
-        ("tmatTDNN", "topDown", range(10)),
-    ]
+def makeTmats(
+    dataDict,
+    tmatAddr,
+    legendNames,
+    reordering,
+    figsize=numpy.array([3, 1]) * 10,
+    zoom=0.02,
 ):
-    fig = plt.figure(figsize=figsize, dpi=300)
-    mainGrid = fig.add_gridspec(1, 3)
+    fig, axes = plt.subplots(nrows=3, ncols=1, figsize=figsize, dpi=300)
     for i, T in enumerate(Temps):
-        ax = fig.add_subplot(mainGrid[i])
-        tmat = ico309_1ns[T][mytmat]
+        # axes[i].set_aspect(1)
+        axes[i].set_title(f"{T} K")
+        # continue
+        tmat = dataDict[T][tmatAddr]
         mask = tmat == 0
-        annots = True  # fsm.getCompactedAnnotationsForTmat_percent(tmat)
+        annots = True
         seaborn.heatmap(
             tmat,
             linewidths=1,
-            ax=ax,
-            # fmt="s",
+            ax=axes[i],
             annot=annots,
             mask=mask,
             square=True,
@@ -82,62 +74,11 @@ for i, (mytmat, legendNames, reordering) in enumerate(
                 weight="bold",
             ),
         )
-        ax.set_title(f"{T} K")
-        fsm.decorateTmatWithLegend(legendNames, reordering, ax, zoom=zoom)
-    fig.savefig(f"SIfigure{i}.png", bbox_inches="tight", pad_inches=0, dpi=300)
-# %%
-figsize = numpy.array([3, 1]) * 10
-zoom = 0.02
-fig = plt.figure(figsize=figsize, dpi=300)
-mainGrid = fig.add_gridspec(3, 2)
-for i, T in enumerate(Temps):
-    ax = fig.add_subplot(mainGrid[i, 0])
-    tmat = ico309_1ns[T]["tmatBU"]
-    mask = tmat == 0
-    annots = fsm.getCompactedAnnotationsForTmat_percent(tmat)
-    seaborn.heatmap(
-        tmat,
-        linewidths=0.1,
-        ax=ax,
-        fmt="s",
-        annot=annots,
-        mask=mask,
-        square=True,
-        cmap="rocket_r",
-        cbar=False,
-        xticklabels=False,
-        yticklabels=False,
-        annot_kws=dict(
-            weight="bold",
-        ),
-        vmax=1,
-        vmin=0,
-    )
-    fsm.decorateTmatWithLegend("bottomUp", fsm.bottomReordering_r, ax, zoom=zoom)
-    ax = fig.add_subplot(mainGrid[i, 1])
-    tmat = ico309_100ps[T]["tmatBU"]
-    mask = tmat == 0
-    annots = fsm.getCompactedAnnotationsForTmat_percent(tmat)
-    seaborn.heatmap(
-        tmat,
-        linewidths=0.1,
-        ax=ax,
-        fmt="s",
-        annot=annots,
-        mask=mask,
-        square=True,
-        cmap="rocket_r",
-        cbar=False,
-        xticklabels=False,
-        yticklabels=False,
-        annot_kws=dict(
-            weight="bold",
-        ),
-        vmax=1,
-        vmin=0,
-    )
-    fsm.decorateTmatWithLegend("bottomUp", fsm.bottomReordering_r, ax, zoom=zoom)
-# %%
+
+        fsm.decorateTmatWithLegend(legendNames, reordering, axes[i], zoom=zoom)
+    return fig
+
+
 def calculateTransitions(tmat, time):
     n = tmat.shape[0]
     rates = numpy.zeros_like(tmat)
@@ -148,145 +89,41 @@ def calculateTransitions(tmat, time):
     return rates
 
 
-figsize = numpy.array([2, 3]) * 10
-zoom = 0.02
-fig = plt.figure(figsize=figsize, dpi=300)
-mainGrid = fig.add_gridspec(3, 2)
-for i, T in enumerate(Temps):
-    ax = fig.add_subplot(mainGrid[i, 0])
-    tmat = calculateTransitions(ico309_1ns[T]["tmatBU"], 1)
-    mask = tmat == 0
-    annots = True  # fsm.getCompactedAnnotationsForTmat_percent(tmat)
-    seaborn.heatmap(
-        tmat,
-        linewidths=0.1,
-        ax=ax,
-        annot=annots,
-        mask=mask,
-        square=True,
-        cmap="rocket_r",
-        cbar=False,
-        xticklabels=False,
-        yticklabels=False,
-        annot_kws=dict(
-            weight="bold",
-        ),
-    )
-    fsm.decorateTmatWithLegend("bottomUp", fsm.bottomReordering_r, ax, zoom=zoom)
-    ax = fig.add_subplot(mainGrid[i, 1])
-    tmat = calculateTransitions(ico309_100ps[T]["tmatBU"], 0.1)
-    mask = tmat == 0
-    annots = True  # fsm.getCompactedAnnotationsForTmat_percent(tmat)
-    seaborn.heatmap(
-        tmat,
-        linewidths=0.1,
-        ax=ax,
-        annot=annots,
-        mask=mask,
-        square=True,
-        cmap="rocket_r",
-        cbar=False,
-        xticklabels=False,
-        yticklabels=False,
-        annot_kws=dict(
-            weight="bold",
-        ),
-    )
-    fsm.decorateTmatWithLegend("bottomUp", fsm.bottomReordering_r, ax, zoom=zoom)
+def transitionsFigures(
+    dataDict1,
+    dataDict2,
+    tmatAddr,
+    legendNames,
+    reordering,
+    figsize=numpy.array([2, 3]) * 10,
+    zoom=0.02,
+):
+    fig, axes = plt.subplots(nrows=3, ncols=2, figsize=figsize, dpi=300)
+    for j, myDict in enumerate([dataDict1, dataDict2]):
+        for i, T in enumerate(Temps):
+            ax = axes[i, j]
+            tmat = calculateTransitions(myDict[T][tmatAddr], 0.2)
+            mask = tmat == 0
+            annots = True  # fsm.getCompactedAnnotationsForTmat_percent(tmat)
+            seaborn.heatmap(
+                tmat,
+                linewidths=0.1,
+                ax=ax,
+                annot=annots,
+                mask=mask,
+                square=True,
+                cmap="rocket_r",
+                cbar=False,
+                xticklabels=False,
+                yticklabels=False,
+                annot_kws=dict(
+                    weight="bold",
+                ),
+            )
+            fsm.decorateTmatWithLegend(legendNames, reordering, ax, zoom=zoom)
+    return fig
 
-# %%
-figsize = numpy.array([2, 3]) * 10
-zoom = 0.02
-fig = plt.figure(figsize=figsize, dpi=300)
-mainGrid = fig.add_gridspec(3, 2)
-for i, T in enumerate(Temps):
-    ax = fig.add_subplot(mainGrid[i, 0])
-    tmat = calculateTransitions(ico309_1ns[T]["tmatTD"], 1)
-    mask = tmat == 0
-    annots = True  # fsm.getCompactedAnnotationsForTmat_percent(tmat)
-    seaborn.heatmap(
-        tmat,
-        linewidths=0.1,
-        ax=ax,
-        annot=annots,
-        mask=mask,
-        square=True,
-        cmap="rocket_r",
-        cbar=False,
-        xticklabels=False,
-        yticklabels=False,
-        annot_kws=dict(
-            weight="bold",
-        ),
-    )
-    fsm.decorateTmatWithLegend("topDown", range(10), ax, zoom=zoom)
-    ax = fig.add_subplot(mainGrid[i, 1])
-    tmat = calculateTransitions(ico309_100ps[T]["tmatTD"], 0.1)
-    mask = tmat == 0
-    annots = True  # fsm.getCompactedAnnotationsForTmat_percent(tmat)
-    seaborn.heatmap(
-        tmat,
-        linewidths=0.1,
-        ax=ax,
-        annot=annots,
-        mask=mask,
-        square=True,
-        cmap="rocket_r",
-        cbar=False,
-        xticklabels=False,
-        yticklabels=False,
-        annot_kws=dict(
-            weight="bold",
-        ),
-    )
-    fsm.decorateTmatWithLegend("topDown", range(10), ax, zoom=zoom)
-# %%
-figsize = numpy.array([2, 3]) * 10
-zoom = 0.02
-fig = plt.figure(figsize=figsize, dpi=300)
-mainGrid = fig.add_gridspec(3, 2)
-for i, T in enumerate(Temps):
-    ax = fig.add_subplot(mainGrid[i, 0])
-    tmat = calculateTransitions(ico309_200ps[T]["tmatTD"], 0.2)
-    mask = tmat == 0
-    annots = True  # fsm.getCompactedAnnotationsForTmat_percent(tmat)
-    seaborn.heatmap(
-        tmat,
-        linewidths=0.1,
-        ax=ax,
-        annot=annots,
-        mask=mask,
-        square=True,
-        cmap="rocket_r",
-        cbar=False,
-        xticklabels=False,
-        yticklabels=False,
-        annot_kws=dict(
-            weight="bold",
-        ),
-    )
-    fsm.decorateTmatWithLegend("topDown", range(10), ax, zoom=zoom)
-    ax = fig.add_subplot(mainGrid[i, 1])
-    tmat = calculateTransitions(ico309_100ps[T]["tmatTD"], 0.1)
-    mask = tmat == 0
-    annots = True  # fsm.getCompactedAnnotationsForTmat_percent(tmat)
-    seaborn.heatmap(
-        tmat,
-        linewidths=0.1,
-        ax=ax,
-        annot=annots,
-        mask=mask,
-        square=True,
-        cmap="rocket_r",
-        cbar=False,
-        xticklabels=False,
-        yticklabels=False,
-        annot_kws=dict(
-            weight="bold",
-        ),
-    )
-    fsm.decorateTmatWithLegend("topDown", range(10), ax, zoom=zoom)
-# %%
+
 def plotEquilibrium(dataDict: dict, T: int, Class: str, colorMap: list, ax=None):
     axis = plt if ax is None else ax
     for i in range(len(colorMap)):
@@ -321,85 +158,137 @@ def stackEquilibrium(
     axis.stackplot(range(t.shape[1]), t, colors=colors)
 
 
-# %%
-figsize = numpy.array([2, 3]) * 10
-
-
 def plotEquilibriumSingle(
-    dataDict: dict, T: int, classNum: int, Class: str, color: list, ax=None
+    dataDict: dict,
+    T: int,
+    classNum: int,
+    Class: str,
+    color: list,
+    label: str = None,
+    ax=None,
 ):
     axis = plt if ax is None else ax
     t = numpy.count_nonzero(dataDict[T][Class].references == classNum, axis=-1)
-    axis.plot(range(t.shape[0]), t, color=color)
+    axis.plot(range(t.shape[0]), t, color=color, label=label)
 
 
 def figureEquilibrium(
-    dataDict: dict, Class: str, cmap: list, figkwargs: dict, reorder=None
+    dataDict: dict,
+    Class: str,
+    cmap: list,
+    figkwargs: dict,
+    labels: list,
+    reorder: list = None,
+    vline: float = None,
 ):
-
-    fig = plt.figure(**figkwargs)
     tdNum = len(cmap)
-
+    fig, axes = plt.subplots(
+        nrows=tdNum, ncols=3, sharex="col", sharey="row", **figkwargs
+    )
     reordering = reorder if reorder else range(tdNum)
-    mainGrid = fig.add_gridspec(tdNum, 3)
-    axes = numpy.empty((tdNum, 3), dtype=numpy.object_)
+
     for i, T in enumerate(Temps):
         for j in range(tdNum):
             jj = reordering[j]
-            axes[j, i] = fig.add_subplot(
-                mainGrid[jj, i],
-                sharex=axes[j - 1, i] if j != 0 else None,
-                sharey=axes[j, i - 1] if i != 0 else None,
+            plotEquilibriumSingle(
+                dataDict, T, j, Class, cmap[j], labels[jj], axes[jj, i]
             )
-            plotEquilibriumSingle(dataDict, T, j, Class, cmap[j], axes[j, i])
+            axes[jj, i].legend(bbox_to_anchor=(1, 1), loc="right", framealpha=1)
+            if i == 0:
+                axes[jj, i].yaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
+                axes[jj, i].set_ylabel("Number of atoms")
+            if jj == (tdNum - 1):
+                t = [i for i in range(0, 2001, 500)]
+                axes[jj, i].set_xticks(t, [i / 1000 for i in t])
+                axes[jj, i].set_xlabel("md time [$\mu$s]")
+            if jj == 0:
+                axes[jj, i].set_title(f"{T} K")
+            if vline:
+                axes[jj, i].axvline(vline, color="k", linestyle="--")
+    fig.align_ylabels(axes[:, 0])
+    return fig
 
 
-figureEquilibrium(
-    ico309_1nsFull, "ClassTD", fsm.topDownColorMap, dict(figsize=figsize, dpi=300)
-)
-figureEquilibrium(
-    ico309_1nsFull, "ClassBU", fsm.bottomUpColorMap, dict(figsize=figsize, dpi=300)
-    , fsm.bottomReordering_r
-)
+#%%
+if __name__ == "__main__":
+
+    ico309_1ns = getFullData("ico309")
+    # ico309_100ps = getFullDataStrided("ico309", slice(10000, None, None))
+    # ico309_200ps = getFullDataStrided("ico309", slice(10000, None, 2))
+
+    # ico309_100psFull = getFullDataStrided("ico309", slice(None))
+    to309_9_4_1nsFull = getFullDataStrided("to309_9_4", slice(None, None, 10))
+    dh348_3_2_3_1nsFull = getFullDataStrided("dh348_3_2_3", slice(None, None, 10))
+    ico309_1nsFull = getFullDataStrided("ico309", slice(None, None, 10))
+    figsize = numpy.array([99, 297]) * 0.1
+    for i, (tmatAddr, legendNames, npTitle, reordering) in enumerate(
+        [
+            ("tmatBUNN", "bottomUp", "Bottom-Up", fsm.bottomReordering_r),
+            ("tmatTDNN", "topDown", "Top-Down", range(10)),
+        ]
+    ):
+        fig = makeTmats(
+            ico309_1ns, tmatAddr, legendNames, reordering, figsize=figsize, zoom=0.04
+        )
+
+        fig.suptitle("$Ih_{309}$ " + npTitle, fontsize=16, y=1)
+        fig.set_layout_engine("tight")
+        fig.savefig(f"SIfigure{i+1}.png", bbox_inches="tight", pad_inches=0, dpi=300)
+
+    figsize = numpy.array([210, 297]) * 0.05
+    ico309_1nsFull = getFullDataStrided("ico309", slice(None, None, 10))
+    fig = figureEquilibrium(
+        ico309_1nsFull,
+        "ClassBU",
+        fsm.bottomUpColorMap,
+        dict(figsize=figsize, dpi=300, tight_layout=True),
+        fsm.bottomUpLabels_ordered,
+        [
+            fsm.bottomReordering_r.index(i)
+            for i in range(len(fsm.bottomUpLabels_ordered))
+        ],
+        vline=1000,
+    )
+
+    fig.suptitle("$Ih_{309}$ Bottom-Up", fontsize=16)
+
+    fig.savefig(f"SIfigure{3}.png", bbox_inches="tight", pad_inches=0, dpi=300)
+
+    for figID, (dataDict, np) in enumerate(
+        [
+            (ico309_1nsFull, "$Ih_{309}$"),
+            (to309_9_4_1nsFull, "$To_{309}$"),
+            (dh348_3_2_3_1nsFull, "$Dh_{309}$"),
+        ],
+        4,
+    ):
+        fig = figureEquilibrium(
+            dataDict,
+            "ClassTD",
+            fsm.topDownColorMap,
+            dict(figsize=figsize, dpi=300, tight_layout=True),
+            fsm.topDownLabels,
+            vline=1000,
+        )
+        fig.suptitle(f"{np} Top-Down", fontsize=16)
+        fig.savefig(f"SIfigure{figID}.png", bbox_inches="tight", pad_inches=0, dpi=300)
+
+    # %%
+
+    to309_9_4_1ns = getFullData("to309_9_4")
+    dh348_3_2_3_1ns = getFullData("dh348_3_2_3")
+    #%%
+    figsize = numpy.array([99, 297]) * 0.1
+    for i,data, tmatAddr, legendNames, npTitle, reordering in [
+        ("To",to309_9_4_1ns, "tmatTDNN", "topDown", "Top-Down", range(10)),
+        ("Dh",dh348_3_2_3_1ns, "tmatTDNN", "topDown", "Top-Down", range(10)),
+    ]:
+        fig = makeTmats(
+            data, tmatAddr, legendNames, reordering, figsize=figsize, zoom=0.04
+        )
+
+        fig.suptitle(f"${i}_{{309}}$ " + npTitle, fontsize=16, y=1)
+        fig.set_layout_engine("tight")
+        fig.savefig(f"SIfigure2{i}.png", bbox_inches="tight", pad_inches=0, dpi=300)
 
 # %%
-figsize = numpy.array([2, 3]) * 10
-fig = plt.figure(figsize=figsize, dpi=300)
-mainGrid = fig.add_gridspec(3, 2)
-for i, T in enumerate(Temps):
-    stackEquilibrium(
-        ico309_1nsFull,
-        T,
-        "ClassTD",
-        fsm.topDownColorMap,
-        fig.add_subplot(mainGrid[i, 1]),
-    )
-    stackEquilibrium(
-        ico309_1nsFull,
-        T,
-        "ClassBU",
-        fsm.bottomUpColorMap,
-        fig.add_subplot(mainGrid[i, 0]),
-        fsm.bottomReordering_r,
-    )
-#%%
-ico309_1nsFF = getFullDataStrided("ico309", slice(None, 1000, 10))
-
-figsize = numpy.array([2, 3]) * 10
-fig = plt.figure(figsize=figsize, dpi=300)
-mainGrid = fig.add_gridspec(3, 2)
-for i, T in enumerate(Temps):
-    plotEquilibrium(
-        ico309_1nsFF,
-        T,
-        "ClassTD",
-        fsm.topDownColorMap,
-        fig.add_subplot(mainGrid[i, 1]),
-    )
-    plotEquilibrium(
-        ico309_1nsFF,
-        T,
-        "ClassBU",
-        fsm.bottomUpColorMap,
-        fig.add_subplot(mainGrid[i, 0]),
-    )

@@ -14,7 +14,7 @@ atom_style      atomic
 
 #INITIAL DATA
 
-read_restart 	${simName}.equilibration.restart
+read_restart 	${simName}.thermalization.restart
 
 # --- SETUP ---
 # (1) NEIGHBOR LIST

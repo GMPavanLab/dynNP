@@ -10,11 +10,11 @@ for file in *.data; do
 	    -v seed_v "${seedV}" \
 	    -v seed_l "${seedL}" \
 	    -log "${dir}.min.log" \
-	    -in minimization.lmp > /dev/null
+	    -in sim00_minimization.lmp > /dev/null
 	
 	echo "lmp: minimization ${dir} exited with code $?"
 
-	#for reproducing the calculation used in thes paper use
+	#for reproducing the calculation used in this paper, please use
 	# for ico 309
 	# 	seedV=18631
     # 	seedL=31922
@@ -37,7 +37,7 @@ for file in *.data; do
 		-v seed_l "${seedL}" \
 		-v Temp "${Temp}" \
 		-log "${simName}.eq.log" \
-		-in thermalization.lmp > /dev/null
+		-in sim01_thermalization.lmp > /dev/null
 	    
 	    echo "lmp: thermalization ${simName} exited with code $?"
 
@@ -48,7 +48,7 @@ for file in *.data; do
 		-v seed_l "${seedL}" \
 		-v Temp "${Temp}" \
 		-log "${simName}.log" \
-		-in start.lmp > /dev/null
+		-in sim02_start.lmp > /dev/null
 	    
 	    echo "lmp: production ${simName} exited with code $?"
 	) &
