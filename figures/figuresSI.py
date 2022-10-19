@@ -273,5 +273,22 @@ if __name__ == "__main__":
         fig.suptitle(f"{np} Top-Down", fontsize=16)
         fig.savefig(f"SIfigure{figID}.png", bbox_inches="tight", pad_inches=0, dpi=300)
 
+    # %%
+
+    to309_9_4_1ns = getFullData("to309_9_4")
+    dh348_3_2_3_1ns = getFullData("dh348_3_2_3")
+    #%%
+    figsize = numpy.array([99, 297]) * 0.1
+    for i,data, tmatAddr, legendNames, npTitle, reordering in [
+        ("To",to309_9_4_1ns, "tmatTDNN", "topDown", "Top-Down", range(10)),
+        ("Dh",dh348_3_2_3_1ns, "tmatTDNN", "topDown", "Top-Down", range(10)),
+    ]:
+        fig = makeTmats(
+            data, tmatAddr, legendNames, reordering, figsize=figsize, zoom=0.04
+        )
+
+        fig.suptitle(f"${i}_{{309}}$ " + npTitle, fontsize=16, y=1)
+        fig.set_layout_engine("tight")
+        fig.savefig(f"SIfigure2{i}.png", bbox_inches="tight", pad_inches=0, dpi=300)
 
 # %%
