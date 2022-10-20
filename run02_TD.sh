@@ -3,6 +3,9 @@
 (
     source ./NPenv/bin/activate
     cd topDown || exit
-    #se non ci sono i dile di reference dai reference maker
+    if [[ ! -f "References.hdf5" ]]; then
+        python TD00_referenceMaker.py
+    fi
+    
     python TDcomplete.py
 )

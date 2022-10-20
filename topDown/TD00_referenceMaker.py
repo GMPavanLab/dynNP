@@ -17,127 +17,6 @@ from dataclasses import dataclass
 import scipy.cluster.hierarchy as sch
 
 #%%
-FramesRequest = dict(
-    ico923_6={
-        "v_5f_ih": (0, 566),
-        "e_(111)_ih": (0, 830),
-        "e_(111)_vih": (0, 828),
-        "s_(111)_ih": (0, 892),
-        "s_(111)_eih": (0, 893),
-        "ss_5f_ih": (0, 312),
-        "ss_FCC_ih": (0, 524),
-        "ss_HCP_ih": (0, 431),
-        "b_5f_ih": (0, 1),
-        "b_HCP_ih": (0, 45),
-        "b_FCC_ih": (0, 127),
-        "b_c_ih": (0, 0),
-    },
-    to807_11_3={
-        "e_(111)_to": (0, 723),
-    },
-    to976_12_4={
-        "v_to": (0, 974),
-        "e_(001)_to": (0, 970),
-        "e_(001)_vto": (0, 972),
-        "e_(111)_vto": (0, 924),
-        "s_(001)_to": (0, 950),
-        "s_(001)_eto": (0, 940),
-        "s_(111)_to": (0, 676),
-        "s_(111)_eto": (0, 920),
-        "ss_v_to": (0, 611),
-        "ss_(001)_to": (0, 258),
-        "ss_(111)_to": (0, 278),
-        "b_FCC_to": (0, 57),
-    },
-    dh1086_7_1_3={
-        "v_5f_dh": (0, 10),
-        "v_slim": (0, 1071),
-        "e_(111)_vdh": (0, 50),
-        "e_(111)_cdh": (0, 798),
-        "e_(111)_dh": (0, 536),
-        "e_slim": (0, 1068),
-        "e_slim_nv": (0, 1070),
-        "s_(111)_slim": (0, 1011),
-        "v_(111)_con": (0, 925),
-        "s_(111)_dh": (0, 670),
-        "ss_HCP_dh": (0, 360),
-        "ss_FCC_dh": (0, 669),
-        "ss_FCC_con": (0, 921),
-        "ss_HCP_con": (0, 797),
-        "b_FCC_dh": (0, 399),
-        "b_HCP_dh": (0, 154),
-        "b_5f_dh": (0, 4),
-        "v_con": (0, 924),
-        "ev_con": (0, 1024),
-    },
-    dh1734_5_4_4={
-        "e_con": (0, 1130),
-        "e_con_v": (0, 1132),
-        "s_(001)_dh": (0, 1643),
-    },
-)
-
-desiredReferenceOrderIco = [
-    "v_5f_ih",
-    "e_(111)_ih",
-    "e_(111)_vih",
-    "s_(111)_ih",
-    "s_(111)_eih",
-    "ss_5f_ih",
-    "ss_FCC_ih",
-    "ss_HCP_ih",
-    "b_5f_ih",
-    "b_HCP_ih",
-    "b_FCC_ih",
-    "b_c_ih",
-]
-
-desiredReferenceOrderTo = [
-    "v_to",
-    "e_(001)_to",
-    "e_(001)_vto",
-    "e_(111)_to",
-    "e_(111)_vto",
-    "s_(001)_to",
-    "s_(001)_eto",
-    "s_(111)_to",
-    "s_(111)_eto",
-    "ss_v_to",
-    "ss_(001)_to",
-    "ss_(111)_to",
-    "b_FCC_to",
-]
-
-desiredReferenceOrderDh = [
-    "v_5f_dh",
-    "v_slim",
-    "e_(111)_vdh",
-    "e_(111)_cdh",
-    "e_(111)_dh",
-    "e_slim",
-    "e_slim_nv",
-    "s_(111)_slim",
-    "v_(111)_con",
-    "e_con",
-    "e_con_v",
-    "v_con",
-    "ev_con",
-    "s_(111)_dh",
-    "s_(001)_dh",
-    "ss_HCP_dh",
-    "ss_FCC_dh",
-    "ss_FCC_con",
-    "ss_HCP_con",
-    "b_FCC_dh",
-    "b_HCP_dh",
-    "b_5f_dh",
-]
-
-desiredReferenceOrder = (
-    desiredReferenceOrderIco + desiredReferenceOrderTo + desiredReferenceOrderDh
-)
-
-
 @dataclass
 class Names:
     cat: str  # :: category
@@ -160,9 +39,6 @@ def nameFromLabel(s):
     sub = s[id1 + 1 : id2]
     sup = " " if id2 == None else s[id2 + 1 :]
     return Names(cat, sub, sup)
-
-
-renamer = {k: nameFromLabel(k) for k in desiredReferenceOrder}
 
 
 def prepareReferenceFrames(FramesRequest, fileName="referenceFrames.hdf5"):
@@ -211,7 +87,79 @@ def referenceDendroMaker(reference: SOAPReferences, **dendroKwargs) -> numpy.nda
     )
 
 
+def getDefaultReferenceOrderIco():
+    return [
+        "v_5f_ih",
+        "e_(111)_ih",
+        "e_(111)_vih",
+        "s_(111)_ih",
+        "s_(111)_eih",
+        "ss_5f_ih",
+        "ss_FCC_ih",
+        "ss_HCP_ih",
+        "b_5f_ih",
+        "b_HCP_ih",
+        "b_FCC_ih",
+        "b_c_ih",
+    ]
+
+
+def getDefaultReferenceOrderTo():
+    return [
+        "v_to",
+        "e_(001)_to",
+        "e_(001)_vto",
+        "e_(111)_to",
+        "e_(111)_vto",
+        "s_(001)_to",
+        "s_(001)_eto",
+        "s_(111)_to",
+        "s_(111)_eto",
+        "ss_v_to",
+        "ss_(001)_to",
+        "ss_(111)_to",
+        "b_FCC_to",
+    ]
+
+
+def getDefaultReferenceOrderDh():
+    return [
+        "v_5f_dh",
+        "v_slim",
+        "e_(111)_vdh",
+        "e_(111)_cdh",
+        "e_(111)_dh",
+        "e_slim",
+        "e_slim_nv",
+        "s_(111)_slim",
+        "v_(111)_con",
+        "e_con",
+        "e_con_v",
+        "v_con",
+        "ev_con",
+        "s_(111)_dh",
+        "s_(001)_dh",
+        "ss_HCP_dh",
+        "ss_FCC_dh",
+        "ss_FCC_con",
+        "ss_HCP_con",
+        "b_FCC_dh",
+        "b_HCP_dh",
+        "b_5f_dh",
+    ]
+
+
+def getDefaultReferenceOrder():
+
+    return (
+        getDefaultReferenceOrderIco()
+        + getDefaultReferenceOrderTo()
+        + getDefaultReferenceOrderDh()
+    )
+
+
 def getDefaultReferences(refFile="References.hdf5"):
+    desiredReferenceOrder = getDefaultReferenceOrder()
     myreferences = dict()
 
     with File(refFile, "r") as refFile:
@@ -237,15 +185,15 @@ def getDefaultReferencesSubdict(NPtype: str, refFile="References.hdf5"):
     NPtype = NPtype.lower()
     if NPtype == "ih" or NPtype == "ico":
         kind = "ico"
-        mydesiredReferenceOrder = desiredReferenceOrderIco
+        mydesiredReferenceOrder = getDefaultReferenceOrderIco()
     elif NPtype == "dh":
         kind = "dh"
-        mydesiredReferenceOrder = desiredReferenceOrderDh
+        mydesiredReferenceOrder = getDefaultReferenceOrderDh()
     elif NPtype == "to":
         kind = "to"
-        mydesiredReferenceOrder = desiredReferenceOrderTo
+        mydesiredReferenceOrder = getDefaultReferenceOrderTo()
     else:
-        raise "You can chose only betwee ih, dh or to"
+        raise "You can chose only between ih, dh or to"
 
     myreferences = dict()
 
@@ -268,9 +216,75 @@ def getDefaultReferencesSubdict(NPtype: str, refFile="References.hdf5"):
     )
 
 
+def getDefaultFrameRequest():
+    return dict(
+        ico923_6={
+            "v_5f_ih": (0, 566),
+            "e_(111)_ih": (0, 830),
+            "e_(111)_vih": (0, 828),
+            "s_(111)_ih": (0, 892),
+            "s_(111)_eih": (0, 893),
+            "ss_5f_ih": (0, 312),
+            "ss_FCC_ih": (0, 524),
+            "ss_HCP_ih": (0, 431),
+            "b_5f_ih": (0, 1),
+            "b_HCP_ih": (0, 45),
+            "b_FCC_ih": (0, 127),
+            "b_c_ih": (0, 0),
+        },
+        to807_11_3={
+            "e_(111)_to": (0, 723),
+        },
+        to976_12_4={
+            "v_to": (0, 974),
+            "e_(001)_to": (0, 970),
+            "e_(001)_vto": (0, 972),
+            "e_(111)_vto": (0, 924),
+            "s_(001)_to": (0, 950),
+            "s_(001)_eto": (0, 940),
+            "s_(111)_to": (0, 676),
+            "s_(111)_eto": (0, 920),
+            "ss_v_to": (0, 611),
+            "ss_(001)_to": (0, 258),
+            "ss_(111)_to": (0, 278),
+            "b_FCC_to": (0, 57),
+        },
+        dh1086_7_1_3={
+            "v_5f_dh": (0, 10),
+            "v_slim": (0, 1071),
+            "e_(111)_vdh": (0, 50),
+            "e_(111)_cdh": (0, 798),
+            "e_(111)_dh": (0, 536),
+            "e_slim": (0, 1068),
+            "e_slim_nv": (0, 1070),
+            "s_(111)_slim": (0, 1011),
+            "v_(111)_con": (0, 925),
+            "s_(111)_dh": (0, 670),
+            "ss_HCP_dh": (0, 360),
+            "ss_FCC_dh": (0, 669),
+            "ss_FCC_con": (0, 921),
+            "ss_HCP_con": (0, 797),
+            "b_FCC_dh": (0, 399),
+            "b_HCP_dh": (0, 154),
+            "b_5f_dh": (0, 4),
+            "v_con": (0, 924),
+            "ev_con": (0, 1024),
+        },
+        dh1734_5_4_4={
+            "e_con": (0, 1130),
+            "e_con_v": (0, 1132),
+            "s_(001)_dh": (0, 1643),
+        },
+    )
+
+
+renamer = {k: nameFromLabel(k) for k in getDefaultReferenceOrder()}
 #%%
 if __name__ == "__main__":
+    desiredReferenceOrder = getDefaultReferenceOrder()
+    FramesRequest = getDefaultFrameRequest()
     references = dict()
+    prepareReferenceFrames(FramesRequest)
 
     with File("referenceFrames.hdf5", "r") as workFile, open(
         "refFile.xyz", "w"

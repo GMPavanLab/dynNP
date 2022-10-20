@@ -121,6 +121,7 @@ def classifyNPs(
     with h5py.File(soapFile, "r") as datafile:
         g = datafile[PCAGroupAddr]
         for k in g.keys():
+            print(f"Applying prediction to trajectory {k}")
             myshape = g[k].shape
             labelshape = (myshape[0], myshape[1])
             memshape = (
