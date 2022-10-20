@@ -80,7 +80,10 @@ class hdbscanNoiseClassifier:
 
 
 #%%
-def trainNoiseClassifier(soapFile:str, fitsetAddress:str, fitSetSlice: slice = slice(None)):
+def trainNoiseClassifier(
+    soapFile: str, fitsetAddress: str, fitSetSlice: slice = slice(None)
+):
+    print(f"Training HDBSCAN*")
     t1_start = perf_counter()
 
     with h5py.File(soapFile, "r") as fitfile:
@@ -104,43 +107,70 @@ def classifyNPs(
     outFile: str,
     whereToSave: str,
 ):
+    """_summary_
+
+    Args:
+        hdnc (hdbscanNoiseClassifier): _description_
+        soapFile (str): _description_
+        PCAGroupAddr (str): _description_
+        outFile (str): _description_
+        whereToSave (str): _description_
+    """
     print(f"Working on {soapFile} and saving on on {outFile}")
     t1_start = perf_counter()
     with h5py.File(soapFile, "r") as datafile:
         g = datafile[PCAGroupAddr]
         for k in g.keys():
             myshape = g[k].shape
-
-            (lbl, strg), mem, lblNN = hdnc.predict(g[k][:, :, :3].reshape(-1, 3))
             labelshape = (myshape[0], myshape[1])
-            memshape = (myshape[0], myshape[1], mem.shape[-1])
+            memshape = (
+                myshape[0],
+                myshape[1],
+                len(hdnc.clusterer.condensed_tree_._select_clusters()),
+            )
             with h5py.File(outFile, "a") as classFile:
                 gout = classFile.require_group(whereToSave)
                 resGroup = gout.require_group(k)
-                resGroup.require_dataset(
+                labels = resGroup.require_dataset(
                     "labels",
                     shape=labelshape,
-                    dtype=int,
-                    data=lbl.reshape(labelshape),
+                    dtype=numpy.int32,
+                    chunks=True
+                    # data=lbl.reshape(labelshape),
                 )
-                resGroup.require_dataset(
+                labelsStrength = resGroup.require_dataset(
                     "labelsStrength",
                     shape=labelshape,
-                    dtype=int,
-                    data=strg.reshape(labelshape),
+                    dtype=numpy.float32,
+                    chunks=True
+                    # data=strg.reshape(labelshape),
                 )
-                resGroup.require_dataset(
+                labelsNN = resGroup.require_dataset(
                     "labelsNN",
                     shape=labelshape,
-                    dtype=int,
-                    data=lblNN.reshape(labelshape),
+                    dtype=numpy.int32,
+                    chunks=True
+                    # data=lblNN.reshape(labelshape),
                 )
-                resGroup.require_dataset(
+                memberships = resGroup.require_dataset(
                     "memberships",
                     shape=memshape,
-                    dtype=int,
-                    data=mem.reshape(memshape),
+                    dtype=numpy.float64,
+                    chunks=True
+                    # data=mem.reshape(memshape),
                 )
+                for chunk in g[k].iter_chunks():
+                    framesChunk = chunk[0]
+                    print(f"classifying frames {framesChunk}")
+                    (lbl, strg), mem, lblNN = hdnc.predict(
+                        # g[k][framesChunk, :, :3].reshape(-1, 3)
+                        g[k][(framesChunk, slice(None), slice(0, 3, 1))].reshape(-1, 3)
+                    )
+                    nframes = lbl.reshape(-1, myshape[1]).shape[0]
+                    labels[framesChunk] = lbl.reshape(nframes, myshape[1])
+                    labelsStrength[framesChunk] = strg.reshape(nframes, myshape[1])
+                    labelsNN[framesChunk] = lblNN.reshape(nframes, myshape[1])
+                    memberships[framesChunk] = mem.reshape(nframes, myshape[1], -1)
     t1_stop = perf_counter()
     print(f"Time for {soapFile} -> {outFile}: {t1_stop - t1_start} s")
 
@@ -164,22 +194,28 @@ def classifyMinimizedNPs(hdnc: hdbscanNoiseClassifier):
                 memshape = (myshape[0], myshape[1], mem.shape[-1])
                 resGroup = gout.require_group(k)
                 resGroup.require_dataset(
-                    "labels", shape=labelshape, dtype=int, data=lbl.reshape(labelshape)
+                    "labels",
+                    shape=labelshape,
+                    dtype=numpy.int32,
+                    data=lbl.reshape(labelshape),
                 )
                 resGroup.require_dataset(
                     "labelsStrength",
                     shape=labelshape,
-                    dtype=int,
+                    dtype=numpy.float32,
                     data=strg.reshape(labelshape),
                 )
                 resGroup.require_dataset(
                     "labelsNN",
                     shape=labelshape,
-                    dtype=int,
+                    dtype=numpy.int32,
                     data=lblNN.reshape(labelshape),
                 )
                 resGroup.require_dataset(
-                    "memberships", shape=memshape, dtype=int, data=mem.reshape(memshape)
+                    "memberships",
+                    shape=memshape,
+                    dtype=numpy.float64,
+                    data=mem.reshape(memshape),
                 )
         t1_stop = perf_counter()
         print(f"Time for {fname}: {t1_stop - t1_start} s")

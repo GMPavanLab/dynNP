@@ -22,7 +22,7 @@ def preparePCAFitSet(
 
 
 def _applypca(SOAPFile, PCAFile, pcaMaker, pcaname):
-    chunklen = 100
+    chunklen = 1000
     pcadim = pcaMaker.n_components_
     pcaGroup = PCAFile.require_group(f"PCAs/{pcaname}")
     pcaGroup.attrs["PCAOrigin"] = f"{pcaname}"
