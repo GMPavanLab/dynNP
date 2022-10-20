@@ -4,10 +4,14 @@ from sklearn.decomposition import PCA
 import SOAPify
 
 #%%
-def preparePCAFitSet(fitsetData: h5py.Dataset, PCAdim: int, dataSetSlice:slice=slice(None)):
+def preparePCAFitSet(
+    fitsetData: h5py.Dataset, PCAdim: int, dataSetSlice: slice = slice(None)
+):
     # given a fitset makes the PCA algorithm learn the parameters
     fitset = fitsetData[dataSetSlice].reshape(-1, fitsetData.shape[-1])
-    print(fitset.shape)
+    print(
+        f"Fitset shape: {fitset.shape}, frames from simulation: {fitsetData[dataSetSlice].shape[0]}"
+    )
     lmax = fitsetData.attrs["l_max"]
     nmax = fitsetData.attrs["n_max"]
     fitset = SOAPify.fillSOAPVectorFromdscribe(fitset, lmax, nmax)

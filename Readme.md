@@ -5,9 +5,12 @@ All of the required package will be installed with:
 ``` bash
 python3 -m venv NPenv
 source ./NPenv/bin/activate
-pip install -U pip wheel
+pip install -U pip
 pip install -r requirements.txt
+pip install --upgrade joblib==1.1.0
 ```
+
+the last line, with the downgrade of joblib, is due to a bug in the requirements of hdbscan 0.8.28
 
 ## NB
 
@@ -28,3 +31,7 @@ Prepare and run the BU analysis with `bash ./run02_BU.sh`
 ## Top-Down analysis
 
 Prepare and run the TD analysis with `bash ./run02_TD.sh`
+
+### Remarks
+
+The Bottom-up and the Top-Down can be executed in any order on in parallel

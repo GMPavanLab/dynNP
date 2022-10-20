@@ -1,5 +1,5 @@
 from referenceMaker import getDefaultReferences, getDefaultReferencesSubdict
-from TD_01calculateDistancesFromReferences import calculatedDistancesAndSave
+from TD01_calculateDistancesFromReferences import calculatedDistancesAndSave
 from TD02_elaborateDistances import elaborateDistancesAndSave
 
 if __name__ == "__main__":
