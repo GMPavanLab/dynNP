@@ -6,9 +6,11 @@ from ovito.modifiers import (
     ColorCodingModifier,
     ExpressionSelectionModifier,
     AssignColorModifier,
-    GenerateTrajectoryLinesModifier,ComputePropertyModifier,ClearSelectionModifier
+    GenerateTrajectoryLinesModifier,
+    ComputePropertyModifier,
+    ClearSelectionModifier,
 )
-from ovito.vis import OpenGLRenderer, Viewport,TrajectoryVis
+from ovito.vis import OpenGLRenderer, Viewport, TrajectoryVis
 import numpy
 from numpy.linalg import norm
 
@@ -17,7 +19,7 @@ def prepareFig3(
     trackedAtom,
     xyzFile,
     OutputName,
-    cmapImage="bottomUP.png",
+    cmapImage="bottomUp.png",
     colorby="bottomUp",
     colorbyInterval=(0.0, 7.0),
     transparentAtoms=None,
@@ -176,8 +178,8 @@ if __name__ == "__main__":
         # camera_dir=(0.29885107843047415, -0.8191262059252515, -0.4896123892299345),
         # fov=0.6108652381980153,
         # vpType=Viewport.Type.Perspective,
-        cmapImage="bottomUPCMAP.png",
-        colorby="bottomUP",
+        cmapImage="bottomUpCMAP.png",
+        colorby="bottomUp",
         colorbyInterval=(0.0, 7.0),
         # cmapImage="topDownCMAP.png",
         # colorby="topDown",

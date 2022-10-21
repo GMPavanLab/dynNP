@@ -4,7 +4,7 @@ import h5py
 import figureSupportModule as fsm
 
 #%% Trajectories
-trajectorySlice = slice(10000, None, 10)
+
 for NPname in ["dh348_3_2_3", "to309_9_4", "ico309"]:
     print(f"{NPname}:")
     data = {300: {}, 400: {}, 500: {}}
@@ -23,10 +23,10 @@ for NPname in ["dh348_3_2_3", "to309_9_4", "ico309"]:
                     getXYZfromTrajGroup(
                         icoFile,
                         g[k],
-                        framesToExport=trajectorySlice,
+                        framesToExport=fsm.trajectorySlice,
                         allFramesProperty='Origin="-40 -40 -40"',
-                        topDown=data[T]["ClassTD"].references[trajectorySlice],
-                        bottomUp=data[T]["ClassBU"].references[trajectorySlice],
+                        topDown=data[T]["ClassTD"].references[fsm.trajectorySlice],
+                        bottomUp=data[T]["ClassBU"].references[fsm.trajectorySlice],
                     )
 #%% Ideals:
 from SOAPify import SOAPclassification

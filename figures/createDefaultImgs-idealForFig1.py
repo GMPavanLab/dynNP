@@ -5,13 +5,13 @@ from ovito.io import import_file
 from ovito.vis import OpenGLRenderer, Viewport
 from ovito.modifiers import ColorCodingModifier, SliceModifier
 
-ouputFname = "BottomUP"
+ouputFname = "ico309_Fig1_BottomUp"
 
 vp = Viewport()
 pipeline = import_file("ico309_Ideal.xyz")
 pipeline.modifiers.append(
     ColorCodingModifier(
-        property="predictionWithNoNoise",
+        property="bottomUp",
         gradient=ColorCodingModifier.Image("bottomUpCMAP.png"),
     )
 )

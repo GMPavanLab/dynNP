@@ -11,7 +11,9 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 #%%
 AtomID = 155
 data = {300: dict(), 400: dict(), 500: dict()}
-fsm.loadClassificationBottomUp("../bottomUp/ico309classifications.hdf5", data, "ico309")
+fsm.loadClassificationBottomUp(
+    "../ico309classifications.hdf5", data, "ico309", fsm.trajectorySlice
+)
 dictionary = numpy.array([fsm.bottomReordering_r.index(i) for i in range(8)])
 colors = [fsm.bottomUpColorMap[i] for i in data[300]["ClassBU"].references[:, AtomID]]
 #%%
@@ -21,7 +23,7 @@ figsize = numpy.array([4, 2]) * 3
 fig, axes = fsm.makeLayout3(figsize=figsize, dpi=300)  # labelsOptions=dict(fontsize=15)
 
 axes[f"NPTime"].imshow(imread(f"ico309_300_Tracking{AtomID}_Time.png"))
-axes[f"NPClasses"].imshow(imread(f"ico309_300_Tracking{AtomID}_bottomUP.png"))
+axes[f"NPClasses"].imshow(imread(f"ico309_300_Tracking{AtomID}_bottomUp.png"))
 fig.colorbar(
     ScalarMappable(cmap="hot"),
     cax=axes[f"NPcbar"],

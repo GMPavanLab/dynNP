@@ -5,8 +5,10 @@ from matplotlib.image import imread
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
 #%%
-data = fsm.pcaLoaderBottomUp("../bottomUp/ico309soap.hdf5")
-fsm.loadClassificationBottomUp("../bottomUp/ico309classifications.hdf5", data, "ico309")
+data = fsm.pcaLoaderBottomUp("../ico309pca.hdf5", fsm.trajectorySlice)
+fsm.loadClassificationBottomUp(
+    "../ico309classifications.hdf5", data, "ico309", fsm.trajectorySlice
+)
 for T in [300, 400, 500]:
     fsm.addPseudoFes(data[T], 150, rangeHisto=[data["xlims"], data["ylims"]])
     fsm.addTmatBU(data[T])
@@ -22,12 +24,8 @@ pFESsmoothing = 0.5
 
 fig1, axesFig1 = fsm.makeLayout1(labelsOptions=labelsOptions, figsize=figsize, dpi=300)
 
-axesFig1["idealAx"].imshow(
-    imread("fittedOn_ico309-SV_18631-SL_31922-T_300-125-eom_ideal.png")
-)
-axesFig1["idealSlicedAx"].imshow(
-    imread("fittedOn_ico309-SV_18631-SL_31922-T_300-125-eom_ideal_sliced.png")
-)
+axesFig1["idealAx"].imshow(imread("ico309_Fig1_BottomUp_ideal.png"))
+axesFig1["idealSlicedAx"].imshow(imread("ico309_Fig1_BottomUp_ideal_sliced.png"))
 
 axesFig1["soapAx"].imshow(imread("ico309SOAPexample.png"))
 
@@ -88,7 +86,7 @@ for ax in [
     axesFig1[f"img300Ax"],
 ]:
     ax.axis("off")
-axesFig1["img300Ax"].imshow(imread("ico309_300-bottomUP.png"))
+axesFig1["img300Ax"].imshow(imread("ico309_300-bottomUp.png"))
 fsm.plotTemperatureData(
     axesFig1,
     300,
@@ -112,7 +110,7 @@ for T in [400, 500]:
         zoom=imgzoom,
         smooth=pFESsmoothing,
     )
-    axesFig2[f"img{T}Ax"].imshow(imread(f"ico309_{T}-bottomUP.png"))
+    axesFig2[f"img{T}Ax"].imshow(imread(f"ico309_{T}-bottomUp.png"))
     axesFig2[f"img{T}Ax"].axis("off")
 
 #%%

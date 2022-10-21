@@ -1,17 +1,13 @@
 #%%
-from matplotlib import offsetbox
-import matplotlib.pyplot as plt
 import numpy
 import figureSupportModule as fsm
-from string import ascii_lowercase as alph
 from matplotlib.image import imread
-import scipy.cluster.hierarchy as sch
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from figure6and7 import addNPImages
 import sys
 
 sys.path.insert(0, "../topDown")
-from referenceMaker import (
+from TD00_referenceMaker import (
     getDefaultReferencesSubdict,
     getDefaultReferences,
     referenceDendroMaker,
@@ -23,8 +19,10 @@ data = {}
 refs = getDefaultReferences("../topDown/References.hdf5")
 for NPname in ["ico309"]:
     data[NPname] = dict()
-    classificationFile = f"../topDown/{NPname}TopBottom.hdf5"
-    fsm.loadClassificationTopDown(classificationFile, data[NPname], NPname)
+    classificationFile = f"../{NPname}TopBottom.hdf5"
+    fsm.loadClassificationTopDown(
+        classificationFile, data[NPname], NPname, fsm.trajectorySlice
+    )
     fsm.loadClassificationTopDown("../minimized.hdf5", data[NPname], NPname)
 
 

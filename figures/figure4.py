@@ -11,7 +11,7 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import sys
 
 sys.path.insert(0, "../topDown")
-from referenceMaker import (
+from TD00_referenceMaker import (
     getDefaultReferencesSubdict,
     getDefaultReferences,
     referenceDendroMaker,

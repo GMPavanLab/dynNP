@@ -18,6 +18,8 @@ from SOAPify import (
     SOAPclassification,
 )
 
+trajectorySlice = slice(10000, None, 10)
+
 sys.path.insert(0, "../topDown")
 from TD00_referenceMaker import (
     getDefaultReferenceOrderIco,

@@ -1,7 +1,4 @@
 #%%
-
-import matplotlib.pyplot as plt
-
 from matplotlib.image import imread
 import figureSupportModule as fsm
 
@@ -13,8 +10,10 @@ import numpy
 data = {}
 for NPname in ["dh348_3_2_3", "to309_9_4"]:
     data[NPname] = dict()
-    classificationFile = f"../topDown/{NPname}TopBottom.hdf5"
-    fsm.loadClassificationTopDown(classificationFile, data[NPname], NPname)
+    classificationFile = f"../{NPname}TopBottom.hdf5"
+    fsm.loadClassificationTopDown(
+        classificationFile, data[NPname], NPname, fsm.trajectorySlice
+    )
     fsm.loadClassificationTopDown("../minimized.hdf5", data[NPname], NPname)
 
 
@@ -115,7 +114,7 @@ if __name__ == "__main__":
             barWidth=0.16,
             barSpace=0.05,
         )
-#        fig.savefig(f"figure{i}.png", bbox_inches="tight", pad_inches=0, dpi=300)
+        fig.savefig(f"figure{i}.png", bbox_inches="tight", pad_inches=0, dpi=300)
 
 
 #%%

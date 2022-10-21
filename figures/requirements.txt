@@ -2,6 +2,5 @@
 SOAPify @git+https://github.com/GMPavanLab/SOAPify.git@AuNPDyn
 #graphs
 seaborn
-#ML:
-sklearn
-hdbscan
+#some images are made with ovito
+ovito

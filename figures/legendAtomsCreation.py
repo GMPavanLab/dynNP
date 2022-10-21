@@ -62,6 +62,7 @@ def CreateLegend(
             renderer=renderer,
             alpha=True,
         )
+    pipeline.remove_from_scene()
 
 
 if __name__ == "__main__":

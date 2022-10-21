@@ -2,8 +2,6 @@
 import figureSupportModule as fsm
 import numpy
 from matplotlib.ticker import MaxNLocator
-from matplotlib.image import imread
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
 import seaborn
 
@@ -11,10 +9,14 @@ import seaborn
 Temps = [300, 400, 500]
 
 
-def getFullData(np):
-    data = fsm.pcaLoaderBottomUp(f"../bottomUp/{np}soap.hdf5")
-    fsm.loadClassificationBottomUp(f"../bottomUp/{np}classifications.hdf5", data, np)
-    fsm.loadClassificationTopDown(f"../topDown/{np}TopBottom.hdf5", data, np)
+def getFiguresData(np):
+    data = fsm.pcaLoaderBottomUp(f"../{np}pca.hdf5", fsm.trajectorySlice)
+    fsm.loadClassificationBottomUp(
+        f"../{np}classifications.hdf5", data, np, fsm.trajectorySlice
+    )
+    fsm.loadClassificationTopDown(
+        f"../{np}TopBottom.hdf5", data, np, fsm.trajectorySlice
+    )
 
     for T in Temps:
         fsm.addPseudoFes(data[T], 150, rangeHisto=[data["xlims"], data["ylims"]])
@@ -212,11 +214,7 @@ def figureEquilibrium(
 #%%
 if __name__ == "__main__":
 
-    ico309_1ns = getFullData("ico309")
-    # ico309_100ps = getFullDataStrided("ico309", slice(10000, None, None))
-    # ico309_200ps = getFullDataStrided("ico309", slice(10000, None, 2))
-
-    # ico309_100psFull = getFullDataStrided("ico309", slice(None))
+    ico309_1ns = getFiguresData("ico309")
     to309_9_4_1nsFull = getFullDataStrided("to309_9_4", slice(None, None, 10))
     dh348_3_2_3_1nsFull = getFullDataStrided("dh348_3_2_3", slice(None, None, 10))
     ico309_1nsFull = getFullDataStrided("ico309", slice(None, None, 10))
@@ -275,13 +273,13 @@ if __name__ == "__main__":
 
     # %%
 
-    to309_9_4_1ns = getFullData("to309_9_4")
-    dh348_3_2_3_1ns = getFullData("dh348_3_2_3")
+    to309_9_4_1ns = getFiguresData("to309_9_4")
+    dh348_3_2_3_1ns = getFiguresData("dh348_3_2_3")
     #%%
     figsize = numpy.array([99, 297]) * 0.1
-    for i,data, tmatAddr, legendNames, npTitle, reordering in [
-        ("To",to309_9_4_1ns, "tmatTDNN", "topDown", "Top-Down", range(10)),
-        ("Dh",dh348_3_2_3_1ns, "tmatTDNN", "topDown", "Top-Down", range(10)),
+    for i, data, tmatAddr, legendNames, npTitle, reordering in [
+        ("To", to309_9_4_1ns, "tmatTDNN", "topDown", "Top-Down", range(10)),
+        ("Dh", dh348_3_2_3_1ns, "tmatTDNN", "topDown", "Top-Down", range(10)),
     ]:
         fig = makeTmats(
             data, tmatAddr, legendNames, reordering, figsize=figsize, zoom=0.04

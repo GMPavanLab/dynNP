@@ -14,3 +14,17 @@ if __name__ == "__main__":
             references, SOAPFileName, classificationFile, refFile="References.hdf5"
         )
         elaborateDistancesAndSave(classificationFile)
+    calculatedDistancesAndSave(
+        references,
+        "referenceFrames.hdf5",
+        "referenceFrames.hdf5",
+        refFile="References.hdf5",
+    )
+    elaborateDistancesAndSave("referenceFrames.hdf5")
+    calculatedDistancesAndSave(
+        references,
+        "../minimized.hdf5",
+        "../minimized.hdf5",
+        refFile="References.hdf5",
+    )
+    elaborateDistancesAndSave("../minimized.hdf5")

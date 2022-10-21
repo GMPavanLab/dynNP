@@ -36,6 +36,11 @@ Prepare and run the TD analysis with `bash ./run02_TD.sh`
 
 Prepare and run the visualizations with with `bash ./run03_visualization.sh`
 
+This script is more set up to be used on the dataset of the article, whereas the others are more general and can be used with other datasets.
+With this, we mean that the object in the 'figure' folder needs more work to be adapted for analyzing new data.
+
+And includes a workaround to a problem that arises when working with ovito
+
 ### Remarks
 
 The Bottom-up and the Top-Down can be executed in any order on in parallel
