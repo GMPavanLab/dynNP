@@ -34,7 +34,8 @@ Prepare and run the TD analysis with `bash ./run02_TD.sh`
 
 ## Visualization
 
-Prepare and run the visualizations with with `bash ./run03_visualization.sh`
+Prepare the visualizations with with `bash ./run03_prepareFigs.sh`
+Create the figures with with `bash ./run04_createFigs.sh`
 
 This script is more set up to be used on the dataset of the article, whereas the others are more general and can be used with other datasets.
 With this, we mean that the object in the 'figure' folder needs more work to be adapted for analyzing new data.
