@@ -1,5 +1,5 @@
 from h5py import File
-from referenceMaker import getDefaultReferences, getDefaultReferencesSubdict
+from TD00_referenceMaker import getDefaultReferences, getDefaultReferencesSubdict
 from SOAPify import getDistancesFromRefNormalized, SOAPReferences
 
 
@@ -13,6 +13,7 @@ def calculatedDistancesAndSave(
         g = workFile[f"SOAP"]
         distG = distFile.require_group("Distances")
         for key in g.keys():
+            print(f"Calculating distances for {key}")
             for refKey in references:
                 t = getDistancesFromRefNormalized(g[key], references[refKey])
                 dgd = distG.require_dataset(

@@ -1,10 +1,14 @@
-from array import array
-from ovito.io import *
-from ovito.modifiers import *
-from ovito.data import *
-from ovito.pipeline import *
-from ovito.vis import *
-from ovito.qt_compat import QtCore
+import os
+
+os.environ["OVITO_GUI_MODE"] = "1"
+from ovito.io import import_file
+from ovito.modifiers import (
+    ColorCodingModifier,
+    ExpressionSelectionModifier,
+    AssignColorModifier,
+    GenerateTrajectoryLinesModifier,ComputePropertyModifier,ClearSelectionModifier
+)
+from ovito.vis import OpenGLRenderer, Viewport,TrajectoryVis
 import numpy
 from numpy.linalg import norm
 

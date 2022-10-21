@@ -1,6 +1,5 @@
 from h5py import File
-from referenceMaker import getDefaultReferences, getDefaultReferencesSubdict
-from SOAPify import getDistancesFromRefNormalized
+from TD00_referenceMaker import getDefaultReferences, getDefaultReferencesSubdict
 import numpy
 
 
@@ -22,13 +21,6 @@ def elaborateDistancesAndSave(classificationFile):
                 classDS[:] = classification
                 classDS.attrs["Reference"] = distG[f"{refKey}/{key}"].attrs["Reference"]
                 classDS.attrs["names"] = distG[f"{refKey}/{key}"].attrs["names"]
-
-    # with File(SOAPFileName, "r") as workFile:
-    #    g=workFile[f"SOAP"]
-    #    for key in g.keys():
-    #        t.append((key,references,SOAPFileName))
-    # with Pool(processes=len(t)) as p:
-    #    p.starmap(calculatedDistancesAndSave,t)
 
 
 if __name__ == "__main__":

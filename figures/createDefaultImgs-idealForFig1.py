@@ -1,3 +1,6 @@
+import os
+
+os.environ["OVITO_GUI_MODE"] = "1"
 from ovito.io import import_file
 from ovito.vis import OpenGLRenderer, Viewport
 from ovito.modifiers import ColorCodingModifier, SliceModifier

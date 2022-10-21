@@ -32,6 +32,10 @@ Prepare and run the BU analysis with `bash ./run02_BU.sh`
 
 Prepare and run the TD analysis with `bash ./run02_TD.sh`
 
+## Visualization
+
+Prepare and run the visualizations with with `bash ./run03_visualization.sh`
+
 ### Remarks
 
 The Bottom-up and the Top-Down can be executed in any order on in parallel

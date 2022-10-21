@@ -8,4 +8,5 @@
     #this may be very heavy on your RAM
     echo classifying
     python BUComplete.py classify
+    
 )

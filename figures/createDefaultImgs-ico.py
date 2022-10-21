@@ -1,3 +1,7 @@
+import os
+
+os.environ["OVITO_GUI_MODE"] = "1"
+
 from ovito.io import import_file
 from ovito.vis import OpenGLRenderer, Viewport
 from ovito.modifiers import ColorCodingModifier
@@ -26,7 +30,7 @@ trajectories = (
     ),
 )
 
-for classificationNAME in ["bottomUP", "topDown"]:
+for classificationNAME in ["bottomUp", "topDown"]:
 
     vp = Viewport()
     pipeline = import_file(f"{trajectories[0]['name']}lastUs@1ns.xyz")

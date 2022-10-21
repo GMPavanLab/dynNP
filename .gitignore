@@ -8,3 +8,4 @@ figures/*.xyz
 !figures/Scissors.png
 .vscode
 .pytest_cache
+__pycache__

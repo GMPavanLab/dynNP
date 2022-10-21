@@ -4,16 +4,15 @@ import h5py
 import figureSupportModule as fsm
 
 #%% Trajectories
+trajectorySlice = slice(10000, None, 10)
 for NPname in ["dh348_3_2_3", "to309_9_4", "ico309"]:
     print(f"{NPname}:")
     data = {300: {}, 400: {}, 500: {}}
     # loading data
-    fsm.loadClassificationBottomUp(
-        f"../bottomUp/{NPname}classifications.hdf5", data, NPname
-    )
-    fsm.loadClassificationTopDown(f"../topDown/{NPname}TopBottom.hdf5", data, NPname)
+    fsm.loadClassificationBottomUp(f"../{NPname}classifications.hdf5", data, NPname)
+    fsm.loadClassificationTopDown(f"../{NPname}TopBottom.hdf5", data, NPname)
     # Exporting xyz
-    with h5py.File(f"../bottomUp/{NPname}_fitted.hdf5", "r") as trajFile:
+    with h5py.File(f"../{NPname}_fitted.hdf5", "r") as trajFile:
         g = trajFile["Trajectories"]
         for k in g:
             T = fsm.getT(k)
@@ -24,9 +23,10 @@ for NPname in ["dh348_3_2_3", "to309_9_4", "ico309"]:
                     getXYZfromTrajGroup(
                         icoFile,
                         g[k],
+                        framesToExport=trajectorySlice,
                         allFramesProperty='Origin="-40 -40 -40"',
-                        topDown=data[T]["ClassTD"].references,
-                        bottomUP=data[T]["ClassBU"].references,
+                        topDown=data[T]["ClassTD"].references[trajectorySlice],
+                        bottomUp=data[T]["ClassBU"].references[trajectorySlice],
                     )
 #%% Ideals:
 from SOAPify import SOAPclassification
@@ -54,7 +54,7 @@ for NPname in ["dh348_3_2_3", "to309_9_4", "ico309"]:
                 g,
                 allFramesProperty='Origin="-40 -40 -40"',
                 topDown=data[T]["ClassTD"].references,
-                bottomUP=data[T]["ClassBU"].references,
+                bottomUp=data[T]["ClassBU"].references,
             )
 
 # %%

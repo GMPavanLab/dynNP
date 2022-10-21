@@ -19,10 +19,10 @@ from SOAPify import (
 )
 
 sys.path.insert(0, "../topDown")
-from referenceMaker import (
-    desiredReferenceOrderIco,
-    desiredReferenceOrderTo,
-    desiredReferenceOrderDh,
+from TD00_referenceMaker import (
+    getDefaultReferenceOrderIco,
+    getDefaultReferenceOrderTo,
+    getDefaultReferenceOrderDh,
 )
 
 __reT = re.compile("T_([0-9]*)")
@@ -172,16 +172,16 @@ topDownClusters = numpy.array(
 )
 
 topDown_ihColorMap = list(
-    seaborn.color_palette("Blues", n_colors=len(desiredReferenceOrderIco))
+    seaborn.color_palette("Blues", n_colors=len(getDefaultReferenceOrderIco()))
 )[::-1]
 topDown_toColorMap = list(
     seaborn.color_palette(
         "Purples",
-        n_colors=len(desiredReferenceOrderTo),
+        n_colors=len(getDefaultReferenceOrderTo()),
     )
 )[::-1]
 topDown_dhColorMap = list(
-    seaborn.color_palette("Greens", n_colors=len(desiredReferenceOrderDh))
+    seaborn.color_palette("Greens", n_colors=len(getDefaultReferenceOrderDh()))
 )[::-1]
 
 topDownFullColorMap = topDown_ihColorMap + topDown_toColorMap + topDown_dhColorMap

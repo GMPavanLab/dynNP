@@ -1,3 +1,6 @@
+import os
+
+os.environ["OVITO_GUI_MODE"] = "1"
 from ovito.io import import_file
 from ovito.vis import OpenGLRenderer, Viewport
 from ovito.modifiers import ColorCodingModifier
@@ -89,10 +92,18 @@ trajectories = (
     ),
 )
 
-for (classificationNAME, maxNum) in [("bottomUP", 7.0), ("topDown", 9.0)]:
+
+def getFname(simName: str) -> str:
+    if "Ideal" not in simName:
+        return f"{simName}lastUs@1ns.xyz"
+    else:
+        return f"{simName}.xyz"
+
+
+for (classificationNAME, maxNum) in [("bottomUp", 7.0), ("topDown", 9.0)]:
 
     vp = Viewport()
-    pipeline = import_file(f"{trajectories[0]['name']}lastUs@1ns.xyz")
+    pipeline = import_file(getFname(trajectories[0]["name"]))
     pipeline.modifiers.append(
         ColorCodingModifier(
             property=classificationNAME,
@@ -106,7 +117,7 @@ for (classificationNAME, maxNum) in [("bottomUP", 7.0), ("topDown", 9.0)]:
     renderer = OpenGLRenderer(antialiasing_level=6)
     for myData in trajectories:
         print(classificationNAME, myData["name"])
-        pipeline.source.load(f"{myData['name']}lastUs@1ns.xyz")
+        pipeline.source.load(getFname(myData["name"]))
         data = pipeline.compute()
         data.cell.vis.enabled = False
         vp.type = Viewport.Type.Ortho

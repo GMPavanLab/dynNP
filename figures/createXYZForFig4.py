@@ -1,7 +1,6 @@
 #%%
 from HDF5er import getXYZfromTrajGroup
 import h5py
-import figureSupportModule as fsm
 
 #%%
 

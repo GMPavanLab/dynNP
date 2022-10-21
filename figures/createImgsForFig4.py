@@ -1,12 +1,12 @@
-from array import array
-from ovito.io import *
-from ovito.modifiers import *
-from ovito.data import *
-from ovito.pipeline import *
-from ovito.vis import *
+import os
+
+os.environ["OVITO_GUI_MODE"] = "1"
+
+from ovito.io import import_file
+from ovito.modifiers import ColorCodingModifier
+from ovito.vis import OpenGLRenderer, PythonViewportOverlay, Viewport
 from ovito.qt_compat import QtCore, QtGui
-import numpy
-from numpy.linalg import norm
+
 
 # Parameters:
 bar_length = 10  # Simulation units (e.g. Angstroms)

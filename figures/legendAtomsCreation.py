@@ -1,3 +1,6 @@
+import os
+
+os.environ["OVITO_GUI_MODE"] = "1"
 from ovito.vis import OpenGLRenderer, Viewport
 from ovito.modifiers import ColorCodingModifier
 from ovito.data import Particles, DataCollection, ParticleType, SimulationCell
@@ -62,6 +65,6 @@ def CreateLegend(
 
 
 if __name__ == "__main__":
-    # CreateLegend("bottomUpCMAP.png", "bottomUp", 8)
-    # CreateLegend("topDownCMAP.png", "topDown", 10)
+    CreateLegend("bottomUpCMAP.png", "bottomUp", 8)
+    CreateLegend("topDownCMAP.png", "topDown", 10)
     CreateLegend("topDownFullCMAP.png", "topDownFull", 47)
