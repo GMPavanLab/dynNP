@@ -19,6 +19,22 @@ The file donw here are set up to reproduce exaclty the results obtained in our s
 ## Simulations
 
 If you have a recent version of lammps (with the [smatb/single](https://docs.lammps.org/pair_smatb.html) pair active) simply launch the script in `simulations`
+And then preprocess the trajectories with `bash ./run00_preprocessTrajectories.sh`
+
+OR
+
+You may download the precompressed trajetory from the [release page on github](https://github.com/GMPavanLab/dynNP/releases/tag/V1.0-trajectories)
+or run the following commands:
+
+```bash
+wget https://github.com/GMPavanLab/dynNP/releases/download/V1.0-trajectories/dh348_3_2_3.hdf5
+wget https://github.com/GMPavanLab/dynNP/releases/download/V1.0-trajectories/dh348_3_2_3_fitted.hdf5
+wget https://github.com/GMPavanLab/dynNP/releases/download/V1.0-trajectories/ico309.hdf5
+wget https://github.com/GMPavanLab/dynNP/releases/download/V1.0-trajectories/ico309_fitted.hdf5
+wget https://github.com/GMPavanLab/dynNP/releases/download/V1.0-trajectories/to309_9_4.hdf5
+wget https://github.com/GMPavanLab/dynNP/releases/download/V1.0-trajectories/to309_9_4_fitted.hdf5
+
+```
 
 ## SOAP calculations
 
