@@ -1,4 +1,4 @@
-# Data and analysis setup for -title here-
+# Data and analysis setup for "Machine Learning of Atomic Dynamics and Statistical Surface Identities in Gold Nanoparticles"
 
 All of the required package will be installed with:
 
