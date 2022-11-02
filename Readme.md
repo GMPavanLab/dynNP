@@ -51,8 +51,8 @@ wget https://github.com/GMPavanLab/dynNP/releases/download/V1.0-trajectories/to3
 
 - Prepare the visualizations and create the figures with with `bash ./run03_prepareFigs.sh`
 
-This scripts contains a small workaround that we encountered in working in an virtual environmnwt with both ovito and matplotlib.
+This scripts contains a small workaround that we encountered in working in an virtual environment with both ovito and matplotlib.
 
 ### Remarks
 
-The Bottom-up and the Top-Down can be executed in any order on in parallel
+The Bottom-up and the Top-Down can be executed in any order or in parallel
