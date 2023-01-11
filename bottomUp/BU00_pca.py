@@ -21,14 +21,15 @@ def preparePCAFitSet(
     return pcaMaker
 
 
-def _applypca(SOAPFile, PCAFile, pcaMaker, pcaname):
+def _applypca(SOAPFile, PCAFile, pcaMaker, pcaname, soapGroupName="SOAP"):
     chunklen = 1000
     pcadim = pcaMaker.n_components_
     pcaGroup = PCAFile.require_group(f"PCAs/{pcaname}")
     pcaGroup.attrs["PCAOrigin"] = f"{pcaname}"
-    for key in SOAPFile["SOAP"].keys():
+    SOAPGroup = SOAPFile[soapGroupName]
+    for key in SOAPGroup.keys():
         print(f"appling PCA to {key}")
-        data = SOAPFile["SOAP"][key]
+        data = SOAPGroup[key]
         lmax = data.attrs["l_max"]
         nmax = data.attrs["n_max"]
         pcaout = pcaGroup.require_dataset(
@@ -52,15 +53,15 @@ def _applypca(SOAPFile, PCAFile, pcaMaker, pcaname):
         pcaout.attrs["variance"] = pcaMaker.explained_variance_ratio_
 
 
-def applypcaNewFile(fname, pcaFileName, pcaMaker, pcaname):
+def applypcaNewFile(fname, pcaFileName, pcaMaker, pcaname, soapGroupName="SOAP"):
     with h5py.File(fname, "r") as SOAPFile, h5py.File(pcaFileName, "a") as PCAFile:
-        _applypca(SOAPFile, PCAFile, pcaMaker, pcaname)
+        _applypca(SOAPFile, PCAFile, pcaMaker, pcaname, soapGroupName)
 
 
-def applypca(fname, pcaMaker, pcaname):
+def applypca(fname, pcaMaker, pcaname, soapGroupName="SOAP"):
     with h5py.File(fname, "a") as SOAPFile:
-        _applypca(SOAPFile, SOAPFile, pcaMaker, pcaname)
-
+        _applypca(SOAPFile, SOAPFile, pcaMaker, pcaname, soapGroupName)
+        
 
 if __name__ == "__main__":
     #%%

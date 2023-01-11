@@ -9,3 +9,6 @@ figures/*.xyz
 .vscode
 .pytest_cache
 __pycache__
+profile.json
+#outputs
+refFile.xyz

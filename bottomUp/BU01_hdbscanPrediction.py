@@ -223,28 +223,57 @@ def classifyMinimizedNPs(hdnc: hdbscanNoiseClassifier):
 
 
 # %%
-def exemplarPlot(nc: hdbscanNoiseClassifier):
-    from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 
-    fig = plt.figure()
-    ax = fig.add_subplot(projection="3d")
 
-    bottomUpcolorMapHex = [
-        "#00b127",  # Faces
-        "#e00081",  # Concave
-        "#0086ba",  # 5foldedSS
-        "#003ac6",  # Ico
-        "#450055",  # Bulk
-        "#3800a8",  # SubSurf
-        "#bdff0e",  # Edges
-        "#ffe823",  # Vertexes
-    ]
-
-    fs = nc.fitset
-    ax.scatter(fs[:, 0], fs[:, 1], fs[:, 2], c="gray", alpha=0.01, s=0.1)
+def exemplarPlot3D(
+    nc: hdbscanNoiseClassifier,
+    x=0,
+    y=1,
+    z=2,
+    ax: plt.Axes = None,
+    colors: list = None,
+    plotFiteSet=True,
+    scatterOptions: dict = {},
+):
+    if ax is None:
+        ax = plt.figure().add_subplot(projection="3d")
+    if plotFiteSet:
+        fs = nc.fitset
+        ax.scatter(fs[:, x], fs[:, y], fs[:, z], c="gray", alpha=0.01, s=0.1)
+    scatterOpt = dict(marker="x")
+    scatterOpt.update(scatterOptions)
     for cluster in nc.exemplars:
+        if colors:
+            scatterOpt.update(dict(color=colors[cluster]))
         t = nc.exemplars[cluster]["points"]
-        ax.scatter(t[:, 0], t[:, 1], t[:, 2], c=bottomUpcolorMapHex[cluster])
+        ax.scatter(t[:, x], t[:, y], t[:, z], **scatterOpt)
+
+
+
+def exemplarPlot(
+    nc: hdbscanNoiseClassifier,
+    x: int = 0,
+    y: int = 1,
+    ax: plt.Axes = None,
+    colors: list = None,  # the colors of the clusters
+    plotFiteSet=True,
+    scatterOptions: dict = {},#optional option to pass to the scatterplot of the exemplars
+):
+    if ax is None:
+        ax: plt.Axes = plt.gca()
+
+    if plotFiteSet:
+        fs = nc.fitset
+        ax.scatter(fs[:, x], fs[:, y], c="gray", alpha=0.01, s=0.1)
+    scatterOpt = dict(marker="x")
+    scatterOpt.update(scatterOptions)
+    for cluster in nc.exemplars:
+        if colors:
+            scatterOpt.update(dict(color=colors[cluster]))
+        t = nc.exemplars[cluster]["points"]
+        ax.scatter(t[:, x], t[:, y], **scatterOpt)
+
 
 
 #%%
