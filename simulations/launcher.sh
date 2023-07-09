@@ -2,9 +2,7 @@
 
 doSimulations(){
     dir=${1%.data}
-    echo ${dir}
     file=$1
-    echo ${file}
     (
 
         lmp -v name "${dir}" \
