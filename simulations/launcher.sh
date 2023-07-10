@@ -2,9 +2,10 @@
 
 doSimulations(){
     dir=${1%.data}
+    file=$1
     (
 
-	lmp -v name "${dir}" \
+        lmp -v name "${dir}" \
 	    -v dataFile "${file}" \
 	    -v Structure "${dir}" \
 	    -v seed_v "${seedV}" \
